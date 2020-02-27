@@ -7,6 +7,8 @@ def addheaders(response):
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains' #see https://www.thesslstore.com/blog/what-is-hypertext-strict-transport-security-hsts/
     response.headers['X-XSS-Protection'] = '1; mode=block' #see https://owasp.org/www-project-secure-headers/
+    #include content security policy header when have time
+    
     return response
 app.after_request(addheaders)
 
