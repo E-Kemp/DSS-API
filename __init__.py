@@ -1,27 +1,25 @@
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, jsonify, redirect
 from Cookie_manager import Cookie_struct, Token_generator
 from Database_Scripts import DB_Manager
 from pbkdf2 import pbkdf2, HMAC
+from response_headers import Headers
 
 app = Flask(__name__)
+app.after_request(Headers.addResponseHeaders)
+
 cookies = Cookie_struct(True, 2)
 
 
 
+@app.route("/") 
+def hello(): 
+    return "Hello World! This is the API."#render_template("index.html")
+ 
+ 
+ 
+ 
 
-def addheaders(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'#'https://www.the-pirate-cove572851084171.co.uk'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains' #see https://www.thesslstore.com/blog/what-is-hypertext-strict-transport-security-hsts/
-    response.headers['X-XSS-Protection'] = '1; mode=block' #see https://owasp.org/www-project-secure-headers/
-    #include content security policy header when have time
-    
-    return response
-app.after_request(addheaders)
-
-
-
-@app.route("/createUser", methods=['POST'])
+@app.route("/createUser", methods=['GET'])
 def createUser():
     username = request.args.get("username")
     password = request.args.get("password")
@@ -38,21 +36,26 @@ def createUser():
         (username, email, salted_pwd, str(salt.hex()), forename, surname, DOB))
         
     userCookie = cookies.createCookie(username, ip).hex()
-    cookies._toString()
     
-    response = make_response("Your generated cookie is: ", str(userCookie))
-    #response = addheaders(response)
-    response.set_cookie('USR_ID', userCookie)
+    #response = {
+    #    "creation-success":True,
+    #    "USR_ID":userCookie
+    #}
     
-    return response
+    #return jsonify(response)
+    
+    
+    #response = make_response("Your generated cookie is: "+ str(userCookie))
+    response = make_response(redirect("http://127.0.0.1:1234"))
+    #response = Headers.addCookieHeaders(response)
+    #print("Cookie: ", userCookie)
+    c_response = Headers.addCookie(response, 'USR_ID', userCookie)
+    
+    return c_response
     
     
     
-
-@app.route("/") 
-def hello(): 
-    return render_template("index.html")
-    
+   
 
 @app.route('/login', methods=['POST'])
 def login():
