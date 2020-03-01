@@ -9,8 +9,10 @@ class DB_Manager():
     @staticmethod
     def execute(sql):
         #print(sql)
-        cur = DB_Manager._getConn().cursor()
+        conn = DB_Manager._getConn()
+        cur = conn.cursor()
         cur.execute(sql)
+        conn.commit()
         return cur.fetchall()
         
     def safeExecute(sql):

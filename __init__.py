@@ -1,4 +1,7 @@
 from flask import Flask, render_template, request, make_response, jsonify, redirect
+import sys, json
+
+sys.path.append("lib/")
 from Cookie_manager import Cookie_struct, Token_generator
 from Database_Scripts import DB_Manager
 from pbkdf2 import pbkdf2, HMAC
@@ -7,6 +10,9 @@ from response_headers import Headers
 app = Flask(__name__)
 app.after_request(Headers.addResponseHeaders)
 
+data = open('config/HEADERS_local.conf', 'r')
+header_struct = json.load(data)
+data.close()
 cookies = Cookie_struct(True, 2)
 
 
