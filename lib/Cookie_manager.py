@@ -2,7 +2,7 @@ import os, datetime, time
 
 class Cookie_struct():
     def __init__(self, HTTPOnly=True, _lifetime=2):
-        self.cookies = {}       #uername, ip address, date
+        self.cookies = {}       #Cookie: uername, ip address, date
         self.lifetime = _lifetime
         
     def _validate(self, ip, cookie):

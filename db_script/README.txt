@@ -1,3 +1,35 @@
+role creation commands
+------------------------------
+CREATE ROLE lowPerm WITH LOGIN PASSWORD 'dca3729609c9c7b649bb';
+
+
+logging in commands
+------------------------------
+psql -U [username] database	#log into database as user
+\password [username]		#change password for user
+
+
+information gathering commands
+------------------------------
+\conninfo			#gets who's logged in, on what database etc
+\dt				#gets current relations/schemas
+SELECT * FROM pg_roles;		#gets roles and permissions
+\du+				# "
+select * from pg_shadow;	#gets roles' passwords
+
+
+
+
+
+INSERT INTO users VALUES ('14henderson', 'a', 'a', 'a', 'Niklas', 'Henderson', '1998-06-06');
+
+
+
+
+
+
+
+
 su apiUser
 psql
 
@@ -29,8 +61,14 @@ psql
 
 
 lowperm
+role creation commands
+------------------------------
+CREATE ROLE lowPerm WITH LOGIN PASSWORD 'dca3729609c9c7b649bb';
 
 
+logging in commands
+------------------------------
+psql -U lowperm apiUser
 
 
 information gathering commands
@@ -38,3 +76,5 @@ information gathering commands
 \conninfo			#gets who's logged in, on what database etc
 \dt				#gets current relations/schemas
 SELECT * FROM pg_roles;		#gets roles and permissions
+\du+				# "
+select * from pg_shadow;	#gets roles' passwords

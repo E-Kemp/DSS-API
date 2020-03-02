@@ -23,7 +23,6 @@ class DB_Manager():
         FROM Users INNER JOIN User_Auth 
         ON (Users.UUID = User_Auth.UUID) 
         WHERE (Users.username='%s' AND User_Auth.password='%s')''' % (username, password), "AUTH")
-        
         if len(authed_users) > 0:
             return True
         else:

@@ -78,23 +78,49 @@ def createUser():
 
 @app.route('/account/sign-in', methods=['POST'])
 def login():
-    username = request.args.get("username")
-    password = request.args.get("password")
+    username = request.form.get("usernameInput")
+    password = request.form.get("passwordInput")
+    
+    
+    
+    u_UUID = DB_Manager.execute('''SELECT Users.UUID FROM Users WHERE (username = '%s');''' % (username), "AUTH")[0][0]
+    u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")[0][0]
+    print("Fetched salt: ", u_salt)
+    u_salt = bytearray.fromhex(u_salt)
+    
+    print("bytes salt: ", u_salt)
+    
+    e_password = pbkdf2(password, u_salt).digest()
+    
+    
     ip = request.environ['REMOTE_ADDR']
     
-    
+    if DB_Manager.authenticateUser(username, e_password) == True:
+        userCookie = cookies.createCookie(username, ip).hex()
+        response = make_response(redirect(WEB_ADDRESS))
+        c_response = Headers.addCookie(response, 'USR_ID', userCookie)
+        return c_response
+    else:
+        return "Wrong password kiddo"
     #first validate user and password
-    userCookie = cookies.createCookie(username, ip).hex()
-    cookies._toString()
     
-    userCookie = cookies.createCookie(username, ip).hex()
-    response = make_response(redirect(WEB_ADDRESS))
-    c_response = Headers.addCookie(response, 'USR_ID', userCookie)
-    return c_response
+    
+    
+    
+    
+@app.route('/account/sign-out')
+def logout():
+    usr_cookie = request.cookies.get("USR_ID")
+    ip = request.environ['REMOTE_ADDR']
+    success = cookies.deleteCookie(usr_cookie, ip)
+    if success == True:
+        return "Successfully logged out"
+    else:
+        return "Error"
 
 
 
-# @app.route('/account/sign-out')
+
 # @app.route('/account/changePassword')
 # @app.route('/account/deleteAccount')
 
