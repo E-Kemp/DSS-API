@@ -11,9 +11,17 @@ class DB_Manager():
         #print(sql)
         conn = DB_Manager._getConn()
         cur = conn.cursor()
-        cur.execute(sql)
-        conn.commit()
-        return cur.fetchall()
+        ret = 0
+        try:
+            cur.execute(sql)
+            conn.commit()
+            ret = cur.fetchall()
+            if ret==None:ret="success"
+        except Exception as e:
+            print("ERROR. Message: ", str(e))
+            ret = None
+        finally:
+            return ret
         
  
  
@@ -23,6 +31,7 @@ class DB_Manager():
         FROM Users INNER JOIN User_Auth 
         ON (Users.UUID = User_Auth.UUID) 
         WHERE (Users.username='%s' AND User_Auth.password='%s')''' % (username, password), "AUTH")
+        print("Returned string: ",authed_users)
         if len(authed_users) > 0:
             return True
         else:
@@ -39,8 +48,21 @@ class DB_Manager():
         else:
             DB_Manager.execute('''INSERT INTO User_Auth VALUES ('%s', '%s', '%s');''' % (curr_UUID, password, salt), "AUTH")
 
-        
-        
+    @staticmethod
+    def getUUID(username):
+        user = DB_Manager.execute('''SELECT * FROM Users WHERE (username='%s')''' % (username), "LOW")
+        if len(user) > 0:
+            return user[0][0]
+        else:
+            return None
+    
+    @staticmethod
+    def getUsername(UUID):
+        user = DB_Manager.execute('''SELECT * FROM Users WHERE (UUID='%s')''' % (UUID), "LOW")
+        if len(user) > 0:
+            return user[0][1]
+        else:
+            return None
         
         
         

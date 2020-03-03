@@ -44,9 +44,8 @@ def hello():
  
 
 @app.route("/account/createUser", methods=['POST'])
-def createUser():
-    print(request.form)
-    
+def createUser():  
+    global cookies
     UUID = Token_generator.new_crypto_bytes(16).hex()
     username = request.form.get("usernameInput")
     password = request.form.get("passwordInput")
@@ -63,10 +62,8 @@ def createUser():
         (UUID, username, email, forename, surname, DOB), "ALTER")
     DB_Manager.changePassword(username, salted_pwd, salt.hex())
         
-        
-        
     #then login the user
-    userCookie = cookies.createCookie(username, ip).hex()
+    userCookie = cookies.createCookie(UUID, ip)
     response = make_response(redirect(WEB_ADDRESS))
     c_response = Headers.addCookie(response, 'USR_ID', userCookie)
     h_response = Headers.addResponseHeaders(c_response)
@@ -79,33 +76,28 @@ def createUser():
 
 @app.route('/account/sign-in', methods=['POST'])
 def login():
+    global cookies
     username = request.form.get("usernameInput")
     password = request.form.get("passwordInput")
     
-    print(username, password)
+    u_UUID = DB_Manager.getUUID(username)
+    u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")
+    if(len(u_salt) == 0): return abort(404)
+    else: u_salt = u_salt[0][0]
     
-    u_UUID = DB_Manager.execute('''SELECT Users.UUID FROM Users WHERE (username = '%s');''' % (username), "AUTH")[0][0]
-    u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")[0][0]
-    print("Fetched salt: ", u_salt)
-    u_salt = bytearray.fromhex(u_salt)
-    
-    print("bytes salt: ", u_salt)
-    
+    u_salt = bytearray.fromhex(u_salt)   
     e_password = pbkdf2(password, u_salt).digest()
-    
-    
     ip = request.environ['REMOTE_ADDR']
     
     if DB_Manager.authenticateUser(username, e_password) == True:
-        userCookie = cookies.createCookie(username, ip).hex()
+        cookies._toString()
+        userCookie = cookies.createCookie(u_UUID, ip)
         response = make_response(redirect(WEB_ADDRESS))
         c_response = Headers.addCookie(response, 'USR_ID', userCookie)
+        cookies._toString()
         return c_response
     else:
         return abort(404)
-    #first validate user and password
-    
-    
     
     
     
@@ -114,12 +106,12 @@ def logout():
     usr_cookie = request.cookies.get("USR_ID")
     ip = request.environ['REMOTE_ADDR']
     success = cookies.deleteCookie(usr_cookie, ip)
+    
     if success == True:
-        blankCookie = cookies.createBlankCookie().hex()
+        blankCookie = cookies.createBlankCookie()
         response = make_response(redirect(WEB_ADDRESS))
         c_response = Headers.addCookie(response)
         return c_response
-        
     else:
         return abort(404)
 
@@ -143,10 +135,10 @@ def getPosts():
             "body": p[2],
             "Date": p[3],
             "Time": p[4],
-            "User_UUID": [5]
+            "User_UUID": p[5]
         }
         posts_dict[p[0]] = dic_rec
-        
+    print(posts_dict)
     return posts_dict
     
     
@@ -175,26 +167,42 @@ def getComments():
 def createPost():
     usr_cookie = request.cookies.get("USR_ID")
     ip = request.environ['REMOTE_ADDR']
-    
-    user = cookies.getUser(usr_cookie, ip)
-    if user == None:
-        return abort(404)
+    user_UUID = cookies.getUUID(usr_cookie, ip)
+    if user_UUID == None: return abort(404)
     else:
-        heading = request.form.get("headingInput")
+        heading = request.form.get("titleInput")
         body = request.form.get("postInput")
-        date = datetime.datetime.now().date()
-        time = datetime.datetime.now().time()
-        UUID = Token_generator.new_crypto_bytes(10)
-        
-        DB_Manager.execute('''INSERT INTO Posts VALUES 
-            ('%s', '%s', '%s', '%s', '%s', '%s')'''
-            % (UUID, heading, body, date, time, ), "ALTER")
-        return ""
-#ALTER
+        date = datetime.datetime.now().strftime("%Y-%m-%d")
+        time = datetime.datetime.now().strftime("%H:%M:%S")
+        UUID = Token_generator.new_crypto_bytes(10).hex()
+        toExecute = ('''INSERT INTO Posts VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''' % (UUID, heading, body, date, time, user_UUID))
+
+        code = DB_Manager.execute(toExecute, "ALTER")
+            
+        if code == None:
+            ret = {"code": "fail", "post": {}}
+        else:
+            ret = {
+                "code":"success",
+                "post": {
+                    "UUID":UUID,
+                    "heading":heading,
+                    "body":body,
+                    "date":date,
+                    "time":time,
+                    "user_UUID":user_UUID        
+                }
+            }
+        return ret
 
 
 
-# @app.route('/post/deletePost')
+#@app.route('/post/deletePost', methods=['POST'])
+#def d
+
+
+
+# 
 
 # @app.route('/post/comment/createComment')
 # @app.route('/post/comment/deleteComment')

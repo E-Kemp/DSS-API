@@ -2,11 +2,13 @@ import os, datetime, time
 
 class Cookie_struct():
     def __init__(self, HTTPOnly=True, _lifetime=2):
-        self.cookies = {}       #Cookie: uername, ip address, date
+        self.cookies = {}       #Cookie: UUID, ip address, date
         self.lifetime = _lifetime
         
     def _validate(self, ip, cookie):
         #ensure the IP is the same for the two cookie usage requests.
+        if cookie not in self.cookies:
+            return False
         if ip != self.cookies[cookie]["ip"]:
             return False
         
@@ -15,15 +17,16 @@ class Cookie_struct():
         if (dateDiff.total_seconds()/3600) > self.lifetime:
             return False
         
+        
         return True
         
         
         
-    def getUser(self, cookie, ip):
+    def getUUID(self, cookie, ip):
         if not self._validate(ip, cookie):
             return None
         else:
-            return self.cookies[cookie]
+            return self.cookies[cookie]["UUID"]
             
     def deleteCookie(self, cookie, ip):
         if not self._validate(ip, cookie):
@@ -38,15 +41,15 @@ class Cookie_struct():
         
         
         
-    def createCookie(self, username, ip):
+    def createCookie(self, UUID, ip):
         #https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html
         #cookie length - at least 16 bytes
         #must be meaningless - to prevent information dislosure attacks
-        cookie = Token_generator.new_crypto_bytes(20)
+        cookie = Token_generator.new_crypto_bytes(20).hex()
         creation_datetime = datetime.datetime.now()
         
         self.cookies[cookie] = {
-            "username":username,
+            "UUID":UUID,
             "ip":ip,
             "datetime":creation_datetime
         }
@@ -55,7 +58,7 @@ class Cookie_struct():
         
     def _toString(self):
         for cookie in self.cookies:
-            print(cookie.hex())
+            print(cookie)
         
         
         
