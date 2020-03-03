@@ -27,58 +27,57 @@ CREATE TABLE User_Auth(
     
 
 CREATE TABLE Posts(
-    id INTEGER PRIMARY KEY NOT NULL,
+    UUID VARCHAR(10) PRIMARY KEY NOT NULL,
     heading VARCHAR(512) NOT NULL,
     body TEXT,
-    username VARCHAR(255) NOT NULL,
     date_posted DATE NOT NULL,
     time_posted TIME NOT NULL,
-    FOREIGN KEY (username) REFERENCES Users(username)
+    user_UUID CHAR(16) NOT NULL,
+    FOREIGN KEY (user_UUID) REFERENCES Users(UUID)
 );
 
 CREATE TABLE Comments(
-    id INTEGER PRIMARY KEY NOT NULL,
-    username VARCHAR(255) NOT NULL,
-    postid INTEGER NOT NULL,
+    UUID VARCHAR(10) PRIMARY KEY NOT NULL,
     date_posted DATE NOT NULL,
     time_posted TIME NOT NULL,
-    FOREIGN KEY (username) REFERENCES Users(username),
-    FOREIGN KEY (postid) REFERENCES Posts(id)
+    user_UUID CHAR(16) NOT NULL,
+    post_UUID VARCHAR(10) NOT NULL,
+    FOREIGN KEY (user_UUID) REFERENCES Users(UUID),
+    FOREIGN KEY (post_UUID) REFERENCES Posts(UUID)
 );
 
-
-
-CREATE OR replace FUNCTION Authenticate_User (_username VARCHAR, _password VARCHAR)
-RETURNS boolean AS $$
-declare
-    records INTEGER;
-begin
-    SELECT COUNT(Users.UUID) INTO records FROM Users INNER JOIN User_Auth ON (Users.UUID = User_Auth.UUID) WHERE (Users.username = _username AND User_Auth.password = _password);
-	IF records = 1 THEN
-		RETURN true;
-	ELSE
-		RETURN false;
-	END IF;
-end $$ LANGUAGE plpgsql;
-
-
-CREATE OR replace FUNCTION Change_Password (_username VARCHAR, _password VARCHAR, _salt VARCHAR)
-RETURNS boolean AS $$
-declare 
-    usr_UUID CHAR(16);
-    num_Auth_records INTEGER;
-begin
-    SELECT Users.UUID INTO usr_UUID FROM Users WHERE (username = _username);
-    SELECT COUNT(*) INTO num_Auth_records FROM User_Auth WHERE (username = _username);
-    IF num_Auth_records = 0 THEN
-        INSERT INTO User_Auth VALUES (usr_UUID, _password, _salt);
-    ELSE
-        UPDATE User_Auth SET password=_password, salt=_salt WHERE (UUID=usr_UUID);
-    END IF;
-end $$ LANGUAGE plpgsql;
-
-
-
-
-
 ''')
+
+# CREATE OR replace FUNCTION Authenticate_User (_username VARCHAR, _password VARCHAR)
+# RETURNS boolean AS $$
+# declare
+    # records INTEGER;
+# begin
+    # SELECT COUNT(Users.UUID) INTO records FROM Users INNER JOIN User_Auth ON (Users.UUID = User_Auth.UUID) WHERE (Users.username = _username AND User_Auth.password = _password);
+	# IF records = 1 THEN
+		# RETURN true;
+	# ELSE
+		# RETURN false;
+	# END IF;
+# end $$ LANGUAGE plpgsql;
+
+
+# CREATE OR replace FUNCTION Change_Password (_username VARCHAR, _password VARCHAR, _salt VARCHAR)
+# RETURNS boolean AS $$
+# declare 
+    # usr_UUID CHAR(16);
+    # num_Auth_records INTEGER;
+# begin
+    # SELECT Users.UUID INTO usr_UUID FROM Users WHERE (username = _username);
+    # SELECT COUNT(*) INTO num_Auth_records FROM User_Auth WHERE (username = _username);
+    # IF num_Auth_records = 0 THEN
+        # INSERT INTO User_Auth VALUES (usr_UUID, _password, _salt);
+    # ELSE
+        # UPDATE User_Auth SET password=_password, salt=_salt WHERE (UUID=usr_UUID);
+    # END IF;
+# end $$ LANGUAGE plpgsql;
+
+
+
+
+

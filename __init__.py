@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, make_response, jsonify, redirect, abort
-import sys, json
+import sys, json, datetime
 
 RUNTIME = "LOCAL"
 WEB_ADDRESS = "http://127.0.0.1:5432"
@@ -138,24 +138,61 @@ def getPosts():
     posts_dict = {}
     for p in posts:
         dic_rec = {
-            "id": p[0],
-            "Heading": p[1],
-            "Body": p[2],
-            "Username": p[3],
-            "Date": p[4],
-            "Time": [5]        
+            "UUID": p[0],
+            "heading": p[1],
+            "body": p[2],
+            "Date": p[3],
+            "Time": p[4],
+            "User_UUID": [5]
         }
         posts_dict[p[0]] = dic_rec
         
     return posts_dict
     
     
+@app.route('/post/comment/getComments/')
+def getComments():
+    comments = DB_Manager.execute('''SELECT * FROM Comments''', "LOW")
+    username = "fafa"#####################
+    
+    comments_dict = {}
+    for c in comments:
+        dict_rec = {
+            "UUID": p[0],
+            "body": p[1],
+            "date_posted": p[2],
+            "time_posted": p[3],
+            "username": username,
+            "user_UUID": p[4],
+            "post_UUID": p[5]         
+        }
+        comments_dict[p[0]] = dict_rec
+    return comments_dict
     
     
-# @app.route('/post/createPost')
+    
+@app.route('/post/createPost', methods=['POST'])
+def createPost():
+    usr_cookie = request.cookies.get("USR_ID")
+    ip = request.environ['REMOTE_ADDR']
+    
+    user = cookies.getUser(usr_cookie, ip)
+    if user == None:
+        return abort(404)
+    else:
+        heading = request.form.get("headingInput")
+        body = request.form.get("postInput")
+        date = datetime.datetime.now().date()
+        time = datetime.datetime.now().time()
+        
+        
+        DB_Manager.execute(
+#ALTER
+
+
+
 # @app.route('/post/deletePost')
 
-# @app.route('/post/comment/getComments')
 # @app.route('/post/comment/createComment')
 # @app.route('/post/comment/deleteComment')
 
