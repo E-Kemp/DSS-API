@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, make_response, jsonify, redirect
+from flask import Flask, render_template, request, make_response, jsonify, redirect, abort
 import sys, json
 
 RUNTIME = "LOCAL"
@@ -35,7 +35,7 @@ app.after_request(Headers.addResponseHeaders)
 
 ##############~~~~~ WEB SERVER PAGES ~~~~~##############
 
-@app.route("/") 
+@app.route("/", methods=['POST', 'GET']) 
 def hello(): 
     return "Hello World! This is the API."#render_template("index.html")
  
@@ -69,8 +69,9 @@ def createUser():
     userCookie = cookies.createCookie(username, ip).hex()
     response = make_response(redirect(WEB_ADDRESS))
     c_response = Headers.addCookie(response, 'USR_ID', userCookie)
+    h_response = Headers.addResponseHeaders(c_response)
     
-    return c_response
+    return h_response
     
     
     
@@ -81,7 +82,7 @@ def login():
     username = request.form.get("usernameInput")
     password = request.form.get("passwordInput")
     
-    
+    print(username, password)
     
     u_UUID = DB_Manager.execute('''SELECT Users.UUID FROM Users WHERE (username = '%s');''' % (username), "AUTH")[0][0]
     u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")[0][0]
@@ -101,7 +102,7 @@ def login():
         c_response = Headers.addCookie(response, 'USR_ID', userCookie)
         return c_response
     else:
-        return "Wrong password kiddo"
+        return abort(404)
     #first validate user and password
     
     
@@ -114,9 +115,13 @@ def logout():
     ip = request.environ['REMOTE_ADDR']
     success = cookies.deleteCookie(usr_cookie, ip)
     if success == True:
-        return "Successfully logged out"
+        blankCookie = cookies.createBlankCookie().hex()
+        response = make_response(redirect(WEB_ADDRESS))
+        c_response = Headers.addCookie(response)
+        return c_response
+        
     else:
-        return "Error"
+        return abort(404)
 
 
 
@@ -126,7 +131,27 @@ def logout():
 
 
 
-# @app.route('/post/getPosts')
+@app.route('/post/getPosts')
+def getPosts():
+    posts = DB_Manager.execute('''SELECT * FROM Posts''', "LOW")
+    
+    posts_dict = {}
+    for p in posts:
+        dic_rec = {
+            "id": p[0],
+            "Heading": p[1],
+            "Body": p[2],
+            "Username": p[3],
+            "Date": p[4],
+            "Time": [5]        
+        }
+        posts_dict[p[0]] = dic_rec
+        
+    return posts_dict
+    
+    
+    
+    
 # @app.route('/post/createPost')
 # @app.route('/post/deletePost')
 

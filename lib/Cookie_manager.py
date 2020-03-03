@@ -32,6 +32,12 @@ class Cookie_struct():
             del self.cookies[cookie]
             return True
             
+    def createBlankCookie(self):
+        return ""
+        
+        
+        
+        
     def createCookie(self, username, ip):
         #https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html
         #cookie length - at least 16 bytes
