@@ -184,9 +184,12 @@ def createPost():
         body = request.form.get("postInput")
         date = datetime.datetime.now().date()
         time = datetime.datetime.now().time()
+        UUID = Token_generator.new_crypto_bytes(10)
         
-        
-        DB_Manager.execute(
+        DB_Manager.execute('''INSERT INTO Posts VALUES 
+            ('%s', '%s', '%s', '%s', '%s', '%s')'''
+            % (UUID, heading, body, date, time, ), "ALTER")
+        return ""
 #ALTER
 
 
