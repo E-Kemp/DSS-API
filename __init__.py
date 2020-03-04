@@ -8,7 +8,7 @@ API_ADDRESS = "http://127.0.0.1:5000"
 API_PORT = "5000"
 
 sys.path.append("lib/")
-from Cookie_manager import Cookie_struct, Token_generator
+from Session_structs import Cookie_struct, Token_generator
 from pbkdf2 import pbkdf2, HMAC
 from response_headers import Headers
 
@@ -118,47 +118,48 @@ def logout():
 
 
 
-# @app.route('/account/changePassword')
+#@app.route('/account/changePassword', methods=['POST'])
 # @app.route('/account/deleteAccount')
 
 
 
-@app.route('/post/getPosts')
+@app.route('/post/getPosts', methods=['GET'])
 def getPosts():
     posts = DB_Manager.execute('''SELECT * FROM Posts''', "LOW")
     
     posts_dict = {}
     for p in posts:
+        username = DB_Manager.getUsername(p[5])
         dic_rec = {
             "UUID": p[0],
             "heading": p[1],
             "body": p[2],
-            "Date": p[3],
-            "Time": p[4],
-            "User_UUID": p[5]
+            "date": p[3],
+            "time": p[4],
+            "username": username
         }
         posts_dict[p[0]] = dic_rec
     print(posts_dict)
     return posts_dict
     
     
-@app.route('/post/comment/getComments/')
+@app.route('/post/comment/getComments/', methods=['GET'])
 def getComments():
-    comments = DB_Manager.execute('''SELECT * FROM Comments''', "LOW")
-    username = "fafa"#####################
+    post_UUID = request.form.get("post_id")
+    comments = DB_Manager.execute('''SELECT * FROM Comments WHERE (UUID='%s')''' % (post_UUID), "LOW")
     
     comments_dict = {}
     for c in comments:
+        username = DB_Manager.getUsername(c[4])
         dict_rec = {
-            "UUID": p[0],
-            "body": p[1],
-            "date_posted": p[2],
-            "time_posted": p[3],
+            "UUID": c[0],
+            "body": c[1],
+            "date_posted": c[2],
+            "time_posted": c[3],
             "username": username,
-            "user_UUID": p[4],
-            "post_UUID": p[5]         
+            "post_UUID": c[5]         
         }
-        comments_dict[p[0]] = dict_rec
+        comments_dict[c[0]] = dict_rec
     return comments_dict
     
     
@@ -196,15 +197,46 @@ def createPost():
         return ret
 
 
-
+@app.route("/post/comment/createComment", methods=['POST'])
+def createComment():
+    usr_cookie = request.cookies.get("USR_ID")
+    ip = request.environ['REMOTE_ADDR']
+    user_UUID = cookies.getUUID(usr_cookie, ip)
+    if user_UUID == None: return abort(404)
+    else:
+        body = request.form.get("comment_body")
+        date = datetime.datetime.now().strftime("%Y-%m-%d")
+        time = datetime.datetime.now().strftime("%H:%M:%S")
+        UUID = Token_generator.new_crypto_bytes(10).hex()
+        post_UUID = request.form.get("post_id")
+        code = DB_Manager.execute('''INSERT INTO Comments VALUES ('%s', '%s', '%s', '%s', '%s', '%s');'''
+            % (UUID, body, date, time, user_UUID, post_UUID), "ALTER")
+            
+        if code == None:
+            ret = {"code": "fail", "comment": {}}
+        else:
+            ret = {
+                "code":"success",
+                "comment":{
+                    "UUID":UUID,
+                    "body":body,
+                    "date":date,
+                    "time":time,
+                    "user_UUID":user_UUID,
+                    "post_UUID":post_UUID
+                }
+            }
+        return ret
+    
+    
+    
+    
+    
 #@app.route('/post/deletePost', methods=['POST'])
 #def d
 
 
 
-# 
-
-# @app.route('/post/comment/createComment')
 # @app.route('/post/comment/deleteComment')
 
     

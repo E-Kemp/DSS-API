@@ -38,6 +38,7 @@ CREATE TABLE Posts(
 
 CREATE TABLE Comments(
     UUID VARCHAR(10) PRIMARY KEY NOT NULL,
+    body TEXT NOT NULL,
     date_posted DATE NOT NULL,
     time_posted TIME NOT NULL,
     user_UUID CHAR(16) NOT NULL,
