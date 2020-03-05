@@ -260,13 +260,39 @@ def deletePost():
             if x1 == None or x2 == None: ret = {"code":"fail", "reason":"There was an error deleting your post."}
             else: ret = {"code":"success"}
     return ret
-#def d
 
 
+@app.route('/post/comment/deleteComment', methods=['POST'])
+def deleteComment():
+    usr_cookie = request.cookies.get("S_ID")
+    ip = request.environ['REMOTE_ADDR']
+    user_UUID = cookies.getUUID(usr_cookie, ip)
+    if user_UUID == None: 
+        ret = {"code": "fail", "reason": "You have been automatically logged out. Please log in again."}
 
-# @app.route('/post/comment/deleteComment')
-
-    
+    else:
+        UUID = request.form.get("comment_UUID")
+        comment_to_delete = DB_Manager.execute('''SELECT * FROM Comments WHERE (UUID='%s');'''
+            % (UUID), "LOW")
+        if comment_to_delete[4] != user_UUID:
+            ret = {"code":"fail", "reason": "You do not own this post."}
+        else:
+            x1 = DB_Manager.execute('''DELETE FROM Comments WHERE (UUID='%s')'''
+                % (UUID), "ALTER")
+            if x1 == None: ret = {"code":"fail", "reason":"There was an error deleting your comment."}
+            else: ret = {"code":"success"}
+    return ret
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     
 if __name__ == "__main__":
     app.run(debug=True, port=API_PORT)
