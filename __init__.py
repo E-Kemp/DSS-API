@@ -93,7 +93,7 @@ def login():
     if DB_Manager.authenticateUser(username, e_password) == True:
         cookies._toString()
         userCookie = cookies.createCookie(u_UUID, ip)
-        response = make_response("This should return a cookie")#redirect(WEB_ADDRESS))
+        response = make_response(redirect(WEB_ADDRESS))#redirect(WEB_ADDRESS))
         c_response = Headers.addCookie(response, 'S_ID', userCookie)
         c_response = Headers.addCookie(response, 'USR_ID', u_UUID)
         cookies._toString()
@@ -137,8 +137,8 @@ def getPosts():
             "UUID": p[0],
             "heading": p[1],
             "body": p[2],
-            "date": p[3],
-            "time": p[4],
+            "date_posted": p[3],
+            "time_posted": p[4],
             "username": username
         }
         posts_dict[p[0]] = dic_rec
