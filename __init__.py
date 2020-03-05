@@ -54,21 +54,18 @@ def createUser():
     surname = request.form.get("surnameInput")
     DOB = request.form.get("dobInput")
     ip = request.environ['REMOTE_ADDR']
-    print(username, password, email)
+    
+    
     salt = Token_generator.new_crypto_bytes(20)
     salted_pwd = pbkdf2(password, salt).digest()
     
-    DB_Manager.execute('''INSERT INTO Users VALUES ('%s', '%s', '%s', '%s', '%s', '%s')''' %
-        (UUID, username, email, forename, surname, DOB), "ALTER")
-    DB_Manager.changePassword(username, salted_pwd, salt.hex())
-        
-    #then login the user
-    userCookie = cookies.createCookie(UUID, ip)
-    response = make_response(redirect(WEB_ADDRESS))
-    c_response = Headers.addCookie(response, 'USR_ID', userCookie)
-    h_response = Headers.addResponseHeaders(c_response)
+    x1 = DB_Manager.execute('''INSERT INTO Users VALUES ('%s', '%s', '%s', '%s', '%s', '%s')''' %
+        (UUID, username, email, forename, surname, DOB), "ALTER")    
+    x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex())
+    if x1==None or x2 == None: ret = {"code":"fail", "reason":"There was an issue with your request"}
+    else: ret = {"code":"success"}
     
-    return h_response
+    return ret
     
     
     
@@ -92,8 +89,9 @@ def login():
     if DB_Manager.authenticateUser(username, e_password) == True:
         cookies._toString()
         userCookie = cookies.createCookie(u_UUID, ip)
-        response = make_response(redirect(WEB_ADDRESS))
-        c_response = Headers.addCookie(response, 'USR_ID', userCookie)
+        response = make_response("This should return a cookie")#redirect(WEB_ADDRESS))
+        c_response = Headers.addCookie(response, 'S_ID', userCookie)
+        c_response = Headers.addCookie(response, 'USR_ID', u_UUID)
         cookies._toString()
         return c_response
     else:
@@ -103,9 +101,10 @@ def login():
     
 @app.route('/account/sign-out')
 def logout():
-    usr_cookie = request.cookies.get("USR_ID")
+    usr_cookie = request.cookies.get("S_ID")
     ip = request.environ['REMOTE_ADDR']
     success = cookies.deleteCookie(usr_cookie, ip)
+    
     
     if success == True:
         blankCookie = cookies.createBlankCookie()
@@ -139,13 +138,12 @@ def getPosts():
             "username": username
         }
         posts_dict[p[0]] = dic_rec
-    print(posts_dict)
     return posts_dict
     
     
 @app.route('/post/comment/getComments/', methods=['GET'])
 def getComments():
-    post_UUID = request.form.get("post_id")
+    post_UUID = request.args.get("post_id")
     comments = DB_Manager.execute('''SELECT * FROM Comments WHERE (UUID='%s')''' % (post_UUID), "LOW")
     
     comments_dict = {}
@@ -166,10 +164,12 @@ def getComments():
     
 @app.route('/post/createPost', methods=['POST'])
 def createPost():
-    usr_cookie = request.cookies.get("USR_ID")
+    usr_cookie = request.cookies.get("S_ID")
     ip = request.environ['REMOTE_ADDR']
     user_UUID = cookies.getUUID(usr_cookie, ip)
-    if user_UUID == None: return abort(404)
+    if user_UUID == None: 
+        ret = {"code": "fail", "reason": "You have been automatically logged out. Please log in again."}
+        
     else:
         heading = request.form.get("titleInput")
         body = request.form.get("postInput")
@@ -181,7 +181,7 @@ def createPost():
         code = DB_Manager.execute(toExecute, "ALTER")
             
         if code == None:
-            ret = {"code": "fail", "post": {}}
+            ret = {"code": "fail", "reason": "Oops! Something went wrong. Please try again."}
         else:
             ret = {
                 "code":"success",
@@ -194,15 +194,16 @@ def createPost():
                     "user_UUID":user_UUID        
                 }
             }
-        return ret
+    return ret
 
 
 @app.route("/post/comment/createComment", methods=['POST'])
 def createComment():
-    usr_cookie = request.cookies.get("USR_ID")
+    usr_cookie = request.cookies.get("S_ID")
     ip = request.environ['REMOTE_ADDR']
     user_UUID = cookies.getUUID(usr_cookie, ip)
-    if user_UUID == None: return abort(404)
+    if user_UUID == None: 
+        ret = {"code": "fail", "reason": "You have been automatically logged out. Please log in again."}
     else:
         body = request.form.get("comment_body")
         date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -226,7 +227,7 @@ def createComment():
                     "post_UUID":post_UUID
                 }
             }
-        return ret
+    return ret
     
     
     
