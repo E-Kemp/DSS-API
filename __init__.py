@@ -152,7 +152,28 @@ def changePassword():
     return ret
 
 
-# @app.route('/account/deleteAccount')
+@app.route('/account/deleteAccount')
+def deleteAccount():
+    usr_cookie = request.cookies.get("S_ID")
+    ip = request.environ['REMOTE_ADDR']
+    user_UUID = cookies.getUUID(usr_cookie, ip)
+    if user_UUID == None: 
+        ret = {"code": "fail", "reason": "You have been automatically logged out. Please log in again."}
+        
+    else:
+        x1 = DB_Manager.execute('''DELETE FROM Comments WHERE (user_UUID='%s')'''
+            % (user_UUID), "ALTER")
+        x2 = DB_Manager.execute('''DELETE FROM Posts WHERE (user_UUID='%s')'''
+            % (user_UUID), "ALTER")
+        x3 = DB_Manager.execute('''DELETE FROM User_Auth WHERE (UUID='%s')'''
+            % (user_UUID), "ALTER")
+        x4 = DB_Manager.execute('''DELETE FROM Users WHERE (UUID='%s')'''
+            % (user_UUID), "AUTH")
+        if x1 == None or x2 == None or x3 == None or x4 == None:
+            ret = {"code":"fail", "reason":"Unknown error deleting user."}
+        else: 
+            ret = {"code":"success"}
+    return ret
 
 
 

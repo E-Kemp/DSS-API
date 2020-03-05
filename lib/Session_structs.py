@@ -16,8 +16,6 @@ class Cookie_struct():
         dateDiff = datetime.datetime.now() - self.cookies[cookie]["datetime"]
         if (dateDiff.total_seconds()/3600) > self.lifetime:
             return False
-        
-        
         return True
         
         
@@ -60,7 +58,16 @@ class Cookie_struct():
         for cookie in self.cookies:
             print(cookie)
         
+class CSRF_tokens_struct():
+    def __init__(self):
+        self.CSRF_tokens = {}   #
+    def generate_token(self, user_UUID):
+        pass
         
+    
+
+
+
         
 class Token_generator():
     @staticmethod
