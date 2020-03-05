@@ -20,8 +20,7 @@ class DB_Manager():
         except Exception as e:
             print("ERROR. Message: ", str(e))
             ret = None
-        finally:
-            return ret
+        return ret
         
  
  
@@ -39,14 +38,20 @@ class DB_Manager():
         
     @staticmethod
     def changePassword(username, password, salt):
-        curr_UUID = DB_Manager.execute('''SELECT Users.UUID FROM Users WHERE (username = '%s');''' % (username), "AUTH")[0][0]
-        num_Auth_records = DB_Manager.execute('''SELECT COUNT(*) FROM User_Auth WHERE (UUID='%s');''' % (curr_UUID), "AUTH")[0][0]
-        #print("CURR UUID: ",curr_UUID)
-        #print("num auth records: ", num_Auth_records)
-        if num_Auth_records > 0:
-            DB_Manager.execute('''UPDATE User_Auth SET password='%s', salt='%s' WHERE (UUID='%s');''' % (password, salt, curr_UUID), "AUTH")
-        else:
-            DB_Manager.execute('''INSERT INTO User_Auth VALUES ('%s', '%s', '%s');''' % (curr_UUID, password, salt), "AUTH")
+        try:
+            curr_UUID = DB_Manager.execute('''SELECT Users.UUID FROM Users WHERE (username = '%s');''' % (username), "AUTH")[0][0]
+            num_Auth_records = DB_Manager.execute('''SELECT COUNT(*) FROM User_Auth WHERE (UUID='%s');''' % (curr_UUID), "AUTH")[0][0]
+            #print("CURR UUID: ",curr_UUID)
+            #print("num auth records: ", num_Auth_records)
+            if num_Auth_records > 0:
+                DB_Manager.execute('''UPDATE User_Auth SET password='%s', salt='%s' WHERE (UUID='%s');''' % (password, salt, curr_UUID), "AUTH")
+            else:
+                DB_Manager.execute('''INSERT INTO User_Auth VALUES ('%s', '%s', '%s');''' % (curr_UUID, password, salt), "AUTH")
+            ret = 0
+        except Exception as e:
+            print("ERROR: ", str(e))
+            ret = None
+        return ret
 
     @staticmethod
     def getUUID(username):

@@ -23,7 +23,9 @@ elif RUNTIME == "PRODUCTION":
 
 header_struct = json.load(data)
 data.close()
+P_VALUE = json.load(open('config/crypt_vars.conf'))["P"]
 cookies = Cookie_struct(True, 2)
+
 
 app = Flask(__name__)
 app.after_request(Headers.addResponseHeaders)
@@ -48,7 +50,7 @@ def createUser():
     global cookies
     UUID = Token_generator.new_crypto_bytes(16).hex()
     username = request.form.get("usernameInput")
-    password = request.form.get("passwordInput")
+    password = request.form.get("passwordInput")+P_VALUE
     email = request.form.get("emailInput")
     forename = request.form.get("forenameInput")
     surname = request.form.get("surnameInput")
@@ -62,6 +64,8 @@ def createUser():
     x1 = DB_Manager.execute('''INSERT INTO Users VALUES ('%s', '%s', '%s', '%s', '%s', '%s')''' %
         (UUID, username, email, forename, surname, DOB), "ALTER")    
     x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex())
+    print("x1", x1)
+    print("x2", x2)
     if x1==None or x2 == None: ret = {"code":"fail", "reason":"There was an issue with your request"}
     else: ret = {"code":"success"}
     
@@ -75,7 +79,7 @@ def createUser():
 def login():
     global cookies
     username = request.form.get("usernameInput")
-    password = request.form.get("passwordInput")
+    password = request.form.get("passwordInput")+P_VALUE
     
     u_UUID = DB_Manager.getUUID(username)
     u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")
@@ -234,6 +238,10 @@ def createComment():
     
     
 #@app.route('/post/deletePost', methods=['POST'])
+
+
+
+
 #def d
 
 
