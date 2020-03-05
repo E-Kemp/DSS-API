@@ -120,8 +120,38 @@ def logout():
 
 
 
+@app.route('/account/changePassword', methods=['POST'])
+def changePassword():
+    usr_cookie = request.cookies.get("S_ID")
+    ip = request.environ['REMOTE_ADDR']
+    user_UUID = cookies.getUUID(usr_cookie, ip)
+    if user_UUID == None: 
+        ret = {"code": "fail", "reason": "You have been automatically logged out. Please log in again."}
+        
+    else:
+        old_password = request.form.get("old_p")+P_VALUE
+        new_password = request.form.get("new_p")+P_VALUE
+        
+        u_UUID = DB_Manager.getUUID(username)
+        u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")
+        if(len(u_salt) == 0): ret = {"code":"fail", "reason":"Unknown error"}
+        else: u_salt = u_salt[0][0]
+        
+        u_salt = bytearray.fromhex(u_salt)   
+        e_password = pbkdf2(password, u_salt).digest()
+        
+        if DB_Manager.authenticateUser(username, e_password) == True:
+            new_salt = Token_generator.new_crypto_bytes(20)
+            salted_pwd = pbkdf2(new_password, new_salt).digest()
+            x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex())
+            if x2 == None: ret = {"code":"fail", "reason":"Error with new password"} 
+            else:
+                ret = {"code":"success"}
+        else:
+            ret = {"code":"fail", "reason":"Old password incorrect."}
+    return ret
 
-#@app.route('/account/changePassword', methods=['POST'])
+
 # @app.route('/account/deleteAccount')
 
 
@@ -262,6 +292,8 @@ def deletePost():
     return ret
 
 
+
+
 @app.route('/post/comment/deleteComment', methods=['POST'])
 def deleteComment():
     usr_cookie = request.cookies.get("S_ID")
@@ -275,7 +307,7 @@ def deleteComment():
         comment_to_delete = DB_Manager.execute('''SELECT * FROM Comments WHERE (UUID='%s');'''
             % (UUID), "LOW")
         if comment_to_delete[4] != user_UUID:
-            ret = {"code":"fail", "reason": "You do not own this post."}
+            ret = {"code":"fail", "reason": "You do not own this comment."}
         else:
             x1 = DB_Manager.execute('''DELETE FROM Comments WHERE (UUID='%s')'''
                 % (UUID), "ALTER")
