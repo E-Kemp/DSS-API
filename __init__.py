@@ -103,7 +103,7 @@ def login():
     
     
     
-@app.route('/account/sign-out')
+@app.route('/account/sign-out', methods=['GET'])
 def logout():
     usr_cookie = request.cookies.get("S_ID")
     ip = request.environ['REMOTE_ADDR']
@@ -113,7 +113,7 @@ def logout():
     if success == True:
         blankCookie = cookies.createBlankCookie()
         response = make_response(redirect(WEB_ADDRESS))
-        c_response = Headers.addCookie(response)
+        c_response = Headers.addCookie(response, 'S_ID', blankCookie)
         return c_response
     else:
         return abort(404)
@@ -237,11 +237,29 @@ def createComment():
     
     
     
-#@app.route('/post/deletePost', methods=['POST'])
+@app.route('/post/deletePost', methods=['POST'])
+def deletePost():
+    usr_cookie = request.cookies.get("S_ID")
+    ip = request.environ['REMOTE_ADDR']
+    user_UUID = cookies.getUUID(usr_cookie, ip)
+    if user_UUID == None: 
+        ret = {"code": "fail", "reason": "You have been automatically logged out. Please log in again."}
 
-
-
-
+    else:
+        UUID = request.form.get("post_UUID")
+        post_to_delete = DB_Manager.execute('''SELECT * FROM Posts WHERE (UUID='%s');'''
+            % (UUID), "LOW")
+        
+        if post_to_delete[5] != user_UUID:
+            ret = {"code":"fail", "reason": "You do not own this post."}
+        else:
+            x1 = DB_Manager.execute('''DELETE FROM Comments WHERE (post_UUID='%s')'''
+                % (UUID), "ALTER")
+            x2 = DB_Manager.execute('''DELETE FROM Posts WHERE (UUID='%s')'''
+                % (UUID), "ALTER")
+            if x1 == None or x2 == None: ret = {"code":"fail", "reason":"There was an error deleting your post."}
+            else: ret = {"code":"success"}
+    return ret
 #def d
 
 
