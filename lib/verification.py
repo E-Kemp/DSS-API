@@ -25,36 +25,23 @@ ThePirateCove Team.
 
     @staticmethod
     def verifyCaptchaCode(code, ip):
-        return True
-        # VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify"
+        VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify"
 
-        # captchaDetails = {
-            # 'secret': '6LdMQ98UAAAAADpBl5ENG7gAUfDQnphq8FZbp2Eh',
-            # 'response': code,
-            # 'remoteip':ip
-            # }
+        captchaDetails = {
+            'secret': '6LdMQ98UAAAAADpBl5ENG7gAUfDQnphq8FZbp2Eh',
+            'response': code,
+            'remoteip':ip
+            }
 
-        # #try:
-        # ver_resp = requests.post(VERIFY_URL, data = captchaDetails).text
-        # print(ver_resp)
-        # ver_resp_json = json.load(ver_resp)
-        # print(ver_resp_json)
-        # if ver_resp_json["success"] == True:
-            # return True
-        # else:
-            # return False
-            
-        #except Exception as e:
-       #     print("ERROR in verifyCaptchaCode: ", str(e))
-       #     return False
-        
-# data = {"secret": "6LezdXwUAAAAAJ0ZrdD7w5JNHG-WLQE2N6Wo86aU", "response": code, "remoteip": ip}
-        # req = urllib.request.Request(url="https://www.google.com/recaptcha/api/siteverify",
-                                     # data=urllib.parse.urlencode(data).encode("utf-8"),
-                                     # headers={"Content-type": "application/x-www-form-urlencoded"})
-        # response = urllib.request.urlopen(req)
-        # the_page = response.read().decode("utf-8")
-        # the_page = the_page.replace("'", "\"")
-        # the_page = json.loads(the_page)
-        
-        # #smtplib
+        try:
+            ver_resp = requests.post(VERIFY_URL, data = captchaDetails).text
+            ver_resp_json = json.loads(ver_resp)
+            if ver_resp_json["success"] == True:
+                return True
+            else:
+                return False
+                
+        except Exception as e:
+            print("ERROR in verifyCaptchaCode: ", str(e))
+            return False
+
