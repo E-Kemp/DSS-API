@@ -221,7 +221,7 @@ def getPosts():
     return posts_dict
     
     
-@app.route('/post/comment/getComments/', methods=['GET'])
+@app.route('/post/comment/getComments', methods=['GET'])
 def getComments():
     post_UUID = request.args.get("post_id")
     comments = DB_Manager.execute('''SELECT * FROM Comments WHERE (UUID='%s')''' % (post_UUID), "LOW")
