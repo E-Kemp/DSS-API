@@ -13,42 +13,43 @@ data.close()
 
 
 class Headers():
-    """
-    A collection of static methods that add different headers server responses
-    This includes HTTP headers, and Cookie headers
-    See:
-      https://www.thesslstore.com/blog/what-is-hypertext-strict-transport-security-hsts/
-      https://owasp.org/www-project-secure-headers/
-    @Author: Niklas Henderson, UEA
-    """
-    
-    @staticmethod
-    def addResponseHeaders(response):
-        response.headers['Access-Control-Allow-Origin'] = header_struct["HTTPHeaders"]["Access-Control-Allow-Origin"]
-        response.headers['X-Frame-Options'] = header_struct["HTTPHeaders"]["X-Frame-Options"]
-        response.headers['Strict-Transport-Security'] = header_struct["HTTPHeaders"]["Strict-Transport-Security"]                    #'max-age=31536000; includeSubDomains' #see https://www.thesslstore.com/blog/what-is-hypertext-strict-transport-security-hsts/
-        response.headers['X-XSS-Protection'] = header_struct["HTTPHeaders"]["X-XSS-Protection"]                      #see https://owasp.org/www-project-secure-headers/
-        #include content security policy header when have time
+	"""
+	A collection of static methods that add different headers server responses
+	This includes HTTP headers, and Cookie headers
+	See:
+	  https://www.thesslstore.com/blog/what-is-hypertext-strict-transport-security-hsts/
+	  https://owasp.org/www-project-secure-headers/
+	@Author: Niklas Henderson, UEA
+	"""
+
+	@staticmethod
+	def addResponseHeaders(response):
+		response.headers['Access-Control-Allow-Origin'] = header_struct["HTTPHeaders"]["Access-Control-Allow-Origin"]
+		print("Response Access-Control-Allow-Origin header: ", response.headers['Access-Control-Allow-Origin'])
+		response.headers['X-Frame-Options'] = header_struct["HTTPHeaders"]["X-Frame-Options"]
+		response.headers['Strict-Transport-Security'] = header_struct["HTTPHeaders"]["Strict-Transport-Security"]                    #'max-age=31536000; includeSubDomains' #see https://www.thesslstore.com/blog/what-is-hypertext-strict-transport-security-hsts/
+		response.headers['X-XSS-Protection'] = header_struct["HTTPHeaders"]["X-XSS-Protection"]                      #see https://owasp.org/www-project-secure-headers/
+		#include content security policy header when have time
+
+		return response
         
-        return response
-        
-        
-    @staticmethod
-    def addCookie(response, name, value):
-        cookieSetString = ""
-        cookieSetString += name+"="+value+";"
-        
-        _lifetime = header_struct["CookieHeaders"]["lifetime"]
-        _expires = datetime.datetime.now() + datetime.timedelta(hours=2)
-        
-        _httpOnly = header_struct["CookieHeaders"]["httpOnly"]
-        _samesite = header_struct["CookieHeaders"]["samesite"]
-        _security = header_struct["CookieHeaders"]["secure"]
-        _path = header_struct["CookieHeaders"]["path"]
-        _domain = header_struct["CookieHeaders"]["domain"]
-        
-        
-        response.set_cookie(name, value, max_age=_lifetime, expires=_expires, samesite=_samesite, domain=_domain, secure=_security)#, path, domain, security, httpOnly)
-        return response
-        
-        
+
+	@staticmethod
+	def addCookie(response, name, value):
+		cookieSetString = ""
+		cookieSetString += name+"="+value+";"
+
+		_lifetime = header_struct["CookieHeaders"]["lifetime"]
+		_expires = datetime.datetime.now() + datetime.timedelta(hours=2)
+
+		_httpOnly = header_struct["CookieHeaders"]["httpOnly"]
+		_samesite = header_struct["CookieHeaders"]["samesite"]
+		_security = header_struct["CookieHeaders"]["secure"]
+		_path = header_struct["CookieHeaders"]["path"]
+		_domain = header_struct["CookieHeaders"]["domain"]
+
+
+		response.set_cookie(name, value, max_age=_lifetime, expires=_expires, samesite=_samesite, domain=_domain, secure=_security)#, path, domain, security, httpOnly)
+		return response
+
+			

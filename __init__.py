@@ -65,7 +65,7 @@ def createUser():
     captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
     if captcha_resp == False:
         ret = {"code":"fail", "reason":"Captcha failed"}
-        return ret
+        return jsonify(ret)
     
     salt = Token_generator.new_crypto_bytes(20)
     salted_pwd = pbkdf2(password, salt).digest()
@@ -76,26 +76,26 @@ def createUser():
     
     if x1==None or x2 == None: 
         ret = {"code":"fail", "reason":"There was an issue with your request"}
-        return ret
+        return jsonify(ret)
     else: 
         Verification.sendVerificationEmail(email, forename, verification_code)
         ret = {"code":"success"}
-        return ret
+        return jsonify(ret)
     ret = {"code":"fail", "reason":"There was an issue with your request"}
-    return ret
+    return jsonify(ret)
     
     
     
 @app.route("/account/verifyUser/")
 def verifyUser():
     verification_Code = request.args.get("id")
-    x1 = DB_Manager.execute('''UPDATE User_Auth SET verified=TRUE WHERE (verification_code='%s')''' %
+    x1 = DB_Manager.execute('''UPDATE User_Auth SET verified='TRUE', verification_code='' WHERE (verification_code='%s')''' %
         (verification_Code), "ALTER")
     if x1 == None:
         ret = {"code":"fail", "reason":"Verification ID incorrect"}
     else:
         ret = {"code":"sucess"}
-    return ret
+    return jsonify(ret)
           
    
 
@@ -173,7 +173,7 @@ def changePassword():
                 ret = {"code":"success"}
         else:
             ret = {"code":"fail", "reason":"Old password incorrect."}
-    return ret
+    return jsonify(ret)
 
 
 @app.route('/account/deleteAccount')
@@ -197,7 +197,7 @@ def deleteAccount():
             ret = {"code":"fail", "reason":"Unknown error deleting user."}
         else: 
             ret = {"code":"success"}
-    return ret
+    return jsonify(ret)
 
 
 
@@ -218,7 +218,7 @@ def getPosts():
             "username": username
         }
         posts_dict[p[0]] = dic_rec
-    return posts_dict
+    return jsonify(posts_dict)
     
     
 @app.route('/post/comment/getComments', methods=['GET'])
@@ -239,7 +239,7 @@ def getComments():
             "user_UUID": c[4]
         }
         comments_dict[c[0]] = dict_rec
-    return comments_dict
+    return jsonify(comments_dict)
     
     
     
@@ -275,7 +275,7 @@ def createPost():
                     "user_UUID":user_UUID        
                 }
             }
-    return ret
+    return jsonify(ret)
 
 
 @app.route("/post/comment/createComment", methods=['POST'])
@@ -308,7 +308,7 @@ def createComment():
                     "post_UUID":post_UUID
                 }
             }
-    return ret
+    return jsonify(ret)
     
     
     
@@ -336,7 +336,7 @@ def deletePost():
                 % (UUID), "ALTER")
             if x1 == None or x2 == None: ret = {"code":"fail", "reason":"There was an error deleting your post."}
             else: ret = {"code":"success"}
-    return ret
+    return jsonify(ret)
 
 
 
@@ -360,11 +360,13 @@ def deleteComment():
                 % (UUID), "ALTER")
             if x1 == None: ret = {"code":"fail", "reason":"There was an error deleting your comment."}
             else: ret = {"code":"success"}
-    return ret
+    return jsonify(ret)
         
         
         
-            
+@app.route('/post/search', methods=['GET'])
+def searchPosts():
+	return None
         
     
 if __name__ == "__main__":
