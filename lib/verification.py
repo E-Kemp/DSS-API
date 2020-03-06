@@ -1,7 +1,7 @@
-import smtplib
+import smtplib, requests, json
 
 
-class emailVerification():
+class Verification():
     @staticmethod
     def sendVerificationEmail(email, forename, URLtoken):
         subject = '''Verify account on ThePirateCove'''
@@ -23,6 +23,31 @@ ThePirateCove Team.
         server.quit()        
 
 
+    @staticmethod
+    def verifyCaptchaCode(code, ip):
+        return True
+        # VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify"
+
+        # captchaDetails = {
+            # 'secret': '6LdMQ98UAAAAADpBl5ENG7gAUfDQnphq8FZbp2Eh',
+            # 'response': code,
+            # 'remoteip':ip
+            # }
+
+        # #try:
+        # ver_resp = requests.post(VERIFY_URL, data = captchaDetails).text
+        # print(ver_resp)
+        # ver_resp_json = json.load(ver_resp)
+        # print(ver_resp_json)
+        # if ver_resp_json["success"] == True:
+            # return True
+        # else:
+            # return False
+            
+        #except Exception as e:
+       #     print("ERROR in verifyCaptchaCode: ", str(e))
+       #     return False
+        
 # data = {"secret": "6LezdXwUAAAAAJ0ZrdD7w5JNHG-WLQE2N6Wo86aU", "response": code, "remoteip": ip}
         # req = urllib.request.Request(url="https://www.google.com/recaptcha/api/siteverify",
                                      # data=urllib.parse.urlencode(data).encode("utf-8"),

@@ -11,7 +11,7 @@ sys.path.append("lib/")
 from Session_structs import Cookie_struct, Token_generator
 from pbkdf2 import pbkdf2, HMAC
 from response_headers import Headers
-from verification import emailVerification
+from verification import Verification
 
 if RUNTIME == "LOCAL": 
     from db_local import DB_Manager
@@ -50,6 +50,7 @@ def getRobots():
 @app.route("/account/createUser", methods=['POST'])
 def createUser():  
     global cookies
+    #print("fields: ", request.form)
     UUID = Token_generator.new_crypto_bytes(16).hex()
     verification_code = Token_generator.new_crypto_bytes(16).hex()
     username = request.form.get("usernameInput")
@@ -60,6 +61,11 @@ def createUser():
     DOB = request.form.get("dobInput")
     ip = request.environ['REMOTE_ADDR']
     
+    captcha_code = request.form.get("g-recaptcha-response")
+    captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
+    if captcha_resp == False:
+        ret = {"code":"fail", "reason":"Captcha failed"}
+        return ret
     
     salt = Token_generator.new_crypto_bytes(20)
     salted_pwd = pbkdf2(password, salt).digest()
@@ -68,12 +74,16 @@ def createUser():
         (UUID, username, email, forename, surname, DOB), "ALTER")    
     x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex(), verification_code)
     
-    if x1==None or x2 == None: ret = {"code":"fail", "reason":"There was an issue with your request"}
+    if x1==None or x2 == None: 
+        ret = {"code":"fail", "reason":"There was an issue with your request"}
+        return ret
     else: 
-        emailVerification.sendVerificationEmail(email, forename, verification_code)
+        Verification.sendVerificationEmail(email, forename, verification_code)
         ret = {"code":"success"}
-    
+        return ret
+    ret = {"code":"fail", "reason":"There was an issue with your request"}
     return ret
+    
     
     
 @app.route("/account/verifyUser/")
@@ -204,6 +214,7 @@ def getPosts():
             "body": p[2],
             "date_posted": p[3],
             "time_posted": p[4],
+            "user_UUID": p[5],
             "username": username
         }
         posts_dict[p[0]] = dic_rec
