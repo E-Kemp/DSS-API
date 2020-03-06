@@ -235,7 +235,8 @@ def getComments():
             "date_posted": c[2],
             "time_posted": c[3],
             "username": username,
-            "post_UUID": c[5]         
+            "post_UUID": c[5],
+            "user_UUID": c[4]
         }
         comments_dict[c[0]] = dict_rec
     return comments_dict
