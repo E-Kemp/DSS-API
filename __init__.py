@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, make_response, jsonify, redirect, abort
+from flask import Flask, render_template, request, make_response, jsonify, redirect, abort, send_from_directory
 import sys, json, datetime
 
 RUNTIME = "LOCAL"
@@ -11,7 +11,7 @@ sys.path.append("lib/")
 from Session_structs import Cookie_struct, Token_generator
 from pbkdf2 import pbkdf2, HMAC
 from response_headers import Headers
-
+from verification import emailVerification
 
 if RUNTIME == "LOCAL": 
     from db_local import DB_Manager
@@ -41,7 +41,9 @@ app.after_request(Headers.addResponseHeaders)
 def hello(): 
     return "Hello World! This is the API."#render_template("index.html")
  
- 
+@app.route("/robots.txt", methods=['GET'])
+def getRobots():
+    return send_from_directory(app.static_folder, "robots.txt")
  
  
 
@@ -49,6 +51,7 @@ def hello():
 def createUser():  
     global cookies
     UUID = Token_generator.new_crypto_bytes(16).hex()
+    verification_code = Token_generator.new_crypto_bytes(16).hex()
     username = request.form.get("usernameInput")
     password = request.form.get("passwordInput")+P_VALUE
     email = request.form.get("emailInput")
@@ -63,16 +66,27 @@ def createUser():
     
     x1 = DB_Manager.execute('''INSERT INTO Users VALUES ('%s', '%s', '%s', '%s', '%s', '%s')''' %
         (UUID, username, email, forename, surname, DOB), "ALTER")    
-    x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex())
-    print("x1", x1)
-    print("x2", x2)
+    x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex(), verification_code)
+    
     if x1==None or x2 == None: ret = {"code":"fail", "reason":"There was an issue with your request"}
-    else: ret = {"code":"success"}
+    else: 
+        emailVerification.sendVerificationEmail(email, forename, verification_code)
+        ret = {"code":"success"}
     
     return ret
     
     
-    
+@app.route("/account/verifyUser/")
+def verifyUser():
+    verification_Code = request.args.get("id")
+    x1 = DB_Manager.execute('''UPDATE User_Auth SET verified=TRUE WHERE (verification_code='%s')''' %
+        (verification_Code), "ALTER")
+    if x1 == None:
+        ret = {"code":"fail", "reason":"Verification ID incorrect"}
+    else:
+        ret = {"code":"sucess"}
+    return ret
+          
    
 
 @app.route('/account/sign-in', methods=['POST'])
@@ -338,13 +352,7 @@ def deleteComment():
         
         
         
-        
-        
-        
-        
-        
-        
-        
+            
         
     
 if __name__ == "__main__":

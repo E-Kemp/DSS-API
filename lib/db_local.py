@@ -29,7 +29,7 @@ class DB_Manager():
         authed_users = DB_Manager.execute('''SELECT * 
         FROM Users INNER JOIN User_Auth 
         ON (Users.UUID = User_Auth.UUID) 
-        WHERE (Users.username='%s' AND User_Auth.password='%s')''' % (username, password), "AUTH")
+        WHERE (Users.username='%s' AND User_Auth.password='%s' AND User_Auth.verified=TRUE)''' % (username, password), "AUTH")
         print("Returned string: ",authed_users)
         if len(authed_users) > 0:
             return True
@@ -37,7 +37,7 @@ class DB_Manager():
             return False
         
     @staticmethod
-    def changePassword(username, password, salt):
+    def changePassword(username, password, salt, veri_code):
         try:
             curr_UUID = DB_Manager.execute('''SELECT Users.UUID FROM Users WHERE (username = '%s');''' % (username), "AUTH")[0][0]
             num_Auth_records = DB_Manager.execute('''SELECT COUNT(*) FROM User_Auth WHERE (UUID='%s');''' % (curr_UUID), "AUTH")[0][0]
@@ -46,7 +46,7 @@ class DB_Manager():
             if num_Auth_records > 0:
                 DB_Manager.execute('''UPDATE User_Auth SET password='%s', salt='%s' WHERE (UUID='%s');''' % (password, salt, curr_UUID), "AUTH")
             else:
-                DB_Manager.execute('''INSERT INTO User_Auth VALUES ('%s', '%s', '%s');''' % (curr_UUID, password, salt), "AUTH")
+                DB_Manager.execute('''INSERT INTO User_Auth VALUES ('%s', '%s', '%s', '%s');''' % (curr_UUID, password, salt, veri_code), "AUTH")
             ret = 0
         except Exception as e:
             print("ERROR: ", str(e))
