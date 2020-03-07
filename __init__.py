@@ -136,13 +136,14 @@ def logout():
 	
 	
 	if success == True:
-		blankCookie = cookies.createBlankCookie()
-		response = make_response(redirect(WEB_ADDRESS))
-		c_response = Headers.addCookie(response, 'S_ID', blankCookie)
-		return c_response
+		#blankCookie = cookies.createBlankCookie()
+		#response = make_response(redirect(WEB_ADDRESS))
+		#c_response = Headers.addCookie(response, 'S_ID', blankCookie)
+		ret = {"code": "success"}
+		
 	else:
-		return abort(404)
-
+		ret = {"code": "danger", "reason": "Error within user session"}
+	return jsonify(ret)
 
 
 @app.route('/account/changePassword', methods=['POST'])
