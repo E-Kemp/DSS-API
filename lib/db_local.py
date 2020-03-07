@@ -59,7 +59,7 @@ class DB_Manager():
 
 	@staticmethod
 	def getUUID(username):
-		user = DB_Manager.execute('''SELECT * FROM Users WHERE (username='%s')''' % (username), "LOW")
+		user = DB_Manager.execute('''SELECT UUID FROM Users WHERE (username='%s')''' % (username), "LOW")
 		if len(user) > 0:
 			return user[0][0]
 		else:
@@ -67,9 +67,9 @@ class DB_Manager():
 	
 	@staticmethod
 	def getUsername(UUID):
-		user = DB_Manager.execute('''SELECT * FROM Users WHERE (UUID='%s')''' % (UUID), "LOW")
+		user = DB_Manager.execute('''SELECT username FROM Users WHERE (UUID='%s')''' % (UUID), "LOW")
 		if len(user) > 0:
-			return user[0][1]
+			return user[0][0]
 		else:
 			return None
 		

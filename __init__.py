@@ -241,6 +241,7 @@ def getComments():
 			"user_UUID": c[4]
 		}
 		comments_dict[c[0]] = dict_rec
+	print("RET: ",comments_dict)
 	return jsonify(comments_dict)
 	
 	
@@ -258,6 +259,7 @@ def createPost():
 		body = request.form.get("postInput")
 		date = datetime.datetime.now().strftime("%Y-%m-%d")
 		time = datetime.datetime.now().strftime("%H:%M:%S")
+		username = DB_Manager.getUsername(user_UUID)
 		UUID = Token_generator.new_crypto_bytes(10).hex()
 		toExecute = ('''INSERT INTO Posts VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''' % (UUID, heading, body, date, time, user_UUID))
 
@@ -274,6 +276,7 @@ def createPost():
 					"body":body,
 					"date":date,
 					"time":time,
+					"username":username,
 					"user_UUID":user_UUID		 
 				}
 			}
@@ -292,6 +295,7 @@ def createComment():
 		date = datetime.datetime.now().strftime("%Y-%m-%d")
 		time = datetime.datetime.now().strftime("%H:%M:%S")
 		UUID = Token_generator.new_crypto_bytes(10).hex()
+		username = DB_Manager.getUsername(user_UUID)
 		post_UUID = request.form.get("post_id")
 		code = DB_Manager.execute('''INSERT INTO Comments VALUES ('%s', '%s', '%s', '%s', '%s', '%s');'''
 			% (UUID, body, date, time, user_UUID, post_UUID), "ALTER")
@@ -306,6 +310,7 @@ def createComment():
 					"body":body,
 					"date":date,
 					"time":time,
+					"username":username,
 					"user_UUID":user_UUID,
 					"post_UUID":post_UUID
 				}
