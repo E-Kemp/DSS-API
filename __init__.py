@@ -225,8 +225,9 @@ def getPosts():
 @app.route('/post/comment/getComments', methods=['GET'])
 def getComments():
 	post_UUID = request.args.get("post_id")
-	comments = DB_Manager.execute('''SELECT * FROM Comments WHERE (UUID='%s')''' % (post_UUID), "LOW")
-	
+	print("UUID requested: ", post_UUID)
+	comments = DB_Manager.execute('''SELECT * FROM Comments WHERE (post_UUID='%s')''' % (post_UUID), "LOW")
+	print("Comments returned: ", comments)
 	comments_dict = {}
 	for c in comments:
 		username = DB_Manager.getUsername(c[4])
