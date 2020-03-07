@@ -249,10 +249,16 @@ def getComments():
 	
 @app.route('/post/createPost', methods=['POST'])
 def createPost():
+	print("IN CREATE POST --------------------------------")
+	print("REQUEST FORM ARGS: ", request.form)
+	print("REQUEST COOKIES: ", request.cookies)
+	#print("HEADERS FROM REQUEST: ", request.headers)
 	usr_cookie = request.cookies.get("S_ID")
+	
 	ip = request.environ['REMOTE_ADDR']
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
+		print("NO USER")
 		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
 		
 	else:
@@ -262,10 +268,11 @@ def createPost():
 		time = datetime.datetime.now().strftime("%H:%M:%S")
 		username = DB_Manager.getUsername(user_UUID)
 		UUID = Token_generator.new_crypto_bytes(10).hex()
+		print("INSERTING INTO DATABASE")
 		toExecute = ('''INSERT INTO Posts VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''' % (UUID, heading, body, date, time, user_UUID))
-
 		code = DB_Manager.execute(toExecute, "ALTER")
 			
+		print("response: ", code)
 		if code == None:
 			ret = {"code": "danger", "reason": "Oops! Something went wrong. Please try again."}
 		else:
@@ -374,7 +381,23 @@ def deleteComment():
 		
 @app.route('/post/search', methods=['GET'])
 def searchPosts():
-	return None
+	search_term = request.args.get('search_term')
+	posts = DB_Manager.execute("SELECT * FROM Posts WHERE (heading LIKE '%s')" % ('%'+search_term+'%',), "LOW")
+	
+	posts_dict = {}
+	for p in posts:
+		username = DB_Manager.getUsername(p[5])
+		dic_rec = {
+			"UUID": p[0],
+			"heading": p[1],
+			"body": p[2],
+			"date_posted": p[3],
+			"time_posted": p[4],
+			"user_UUID": p[5],
+			"username": username
+		}
+		posts_dict[p[0]] = dic_rec
+	return jsonify(posts_dict)
 		
 	
 if __name__ == "__main__":
