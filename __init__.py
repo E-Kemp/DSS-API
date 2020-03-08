@@ -375,8 +375,10 @@ def deleteComment():
     else:
         UUID = request.form.get("comment_UUID")
         comment_to_delete = DB_Manager.execute("LOW", '''SELECT * FROM Comments WHERE (UUID='%s');''', UUID)
-        if comment_to_delete[4] != user_UUID:
-            ret = {"code":"danger", "reason": "You do not own this comment."}
+        if comment_to_delete == None or len(comment_to_delete) == 0:
+            ret = {"code":"warning", "reason": "Comment with this ID does not exist"}
+        elif comment_to_delete[0][4] != user_UUID:
+            ret = {"code":"warning", "reason": "You do not own this comment."}
         else:
             x1 = DB_Manager.execute("ALTER", '''DELETE FROM Comments WHERE (UUID='%s')''', UUID)
             if x1 == None: ret = {"code":"warning", "reason":"There was an error deleting your comment."}
