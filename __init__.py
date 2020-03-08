@@ -387,21 +387,23 @@ def deleteComment():
 @app.route('/post/search', methods=['GET'])
 def searchPosts():
     search_term = request.args.get('search_term')
-    posts = DB_Manager.execute("SELECT * FROM Posts WHERE (heading LIKE '%s')" % ('%'+search_term+'%',), "LOW")
+    posts = DB_Manager.execute("LOW", '''SELECT * FROM Posts WHERE (heading LIKE '%s')''', '%'+search_term+'%',)
     
     posts_dict = {}
-    for p in posts:
-        username = DB_Manager.getUsername(p[5])
-        dic_rec = {
-            "UUID": p[0],
-            "heading": p[1],
-            "body": p[2],
-            "date_posted": p[3],
-            "time_posted": p[4],
-            "user_UUID": p[5],
-            "username": username
-        }
-        posts_dict[p[0]] = dic_rec
+    
+    if posts != None:
+        for p in posts:
+            username = DB_Manager.getUsername(p[5])
+            dic_rec = {
+                "UUID": p[0],
+                "heading": p[1],
+                "body": p[2],
+                "date_posted": p[3],
+                "time_posted": p[4],
+                "user_UUID": p[5],
+                "username": username
+            }
+            posts_dict[p[0]] = dic_rec
     return jsonify(posts_dict)
         
     
