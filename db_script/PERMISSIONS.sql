@@ -35,3 +35,4 @@ GRANT SELECT ON Users TO authperm;
 
 GRANT SELECT ON User_Auth TO authperm;
 GRANT INSERT ON User_Auth TO authperm;
+GRANT UPDATE ON User_Auth TO authperm;
