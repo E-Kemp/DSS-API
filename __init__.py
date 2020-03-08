@@ -324,8 +324,8 @@ def createComment():
                 "comment":{
                     "UUID":UUID,
                     "body":body,
-                    "date":date,
-                    "time":time,
+                    "date_posted":date,
+                    "time_posted":time,
                     "username":username,
                     "user_UUID":user_UUID,
                     "post_UUID":post_UUID
