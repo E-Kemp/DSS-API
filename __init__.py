@@ -108,7 +108,9 @@ def login():
 	
 	u_UUID = DB_Manager.getUUID(username)
 	u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")
-	if(len(u_salt) == 0): return abort(404)
+	if(len(u_salt) == 0): 
+		ret = {"code":"danger", "reason":"Username or Password incorrect."}
+		return jsonify(ret)
 	else: u_salt = u_salt[0][0]
 	
 	u_salt = bytearray.fromhex(u_salt)	 
@@ -116,16 +118,15 @@ def login():
 	ip = request.environ['REMOTE_ADDR']
 	
 	if DB_Manager.authenticateUser(username, e_password) == True:
-		cookies._toString()
 		userCookie = cookies.createCookie(u_UUID, ip)
-		response = make_response(redirect(WEB_ADDRESS))#redirect(WEB_ADDRESS))
+		ret = {"code":"success"}
+		response = make_response(jsonify(ret))
 		c_response = Headers.addCookie(response, 'S_ID', userCookie)
 		c_response = Headers.addCookie(response, 'USR_ID', u_UUID)
-		cookies._toString()
 		return c_response
 	else:
-		return abort(404)
-	
+		ret = {"code":"danger", "reason":"Username or Password incorrect."}
+		return jsonify(ret)
 	
 	
 @app.route('/account/sign-out', methods=['GET'])
