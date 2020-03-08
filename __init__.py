@@ -68,6 +68,7 @@ def createUser():
     
     captcha_code = request.form.get("g-recaptcha-response")
     captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
+    
     if captcha_resp == False:
         ret = {"code":"danger", "reason":"Captcha failed"}
         return jsonify(ret)

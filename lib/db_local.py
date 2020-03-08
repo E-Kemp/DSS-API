@@ -128,9 +128,9 @@ class DB_Manager():
         """
     
         keywords = {
-             "'" : '@apos;', '0x27': '@apos;',  
-             '"' : '@quot;','0x22': '@quot;',
-             '&' : '@amp;', '0x26': '@amp;'
+             "'" : '@apos', '0x27': '@apos',  
+             '"' : '@quot','0x22': '@quot',
+             '&' : '@amp', '0x26': '@amp'
              }
         
         
@@ -149,9 +149,9 @@ class DB_Manager():
         """
         if text == None: return ''
         keywords = {
-            '<': '@lt;', '0x3c': '@lt;', 
-            '>': '@gt;', '0x3e': '@gt;', 
-            '&' : '@amp;', '0x26': '@amp;'
+            '<': '</', '0x3c': '@lt', 
+            '>': '>/', '0x3e': '@gt', 
+            '&' : '&/', '0x26': '@amp'
             }
         for key in keywords:
             text = text.replace(key, keywords[key])
@@ -167,11 +167,12 @@ class DB_Manager():
         """       
         if text == None: return ''
         keywords = {
-            '<': '@lt;', '0x3c': '@lt;', 
-            '>': '@gt;', '0x3e': '@gt;', 
-            "'" : '@apos;', '0x27': '@apos;',  
-            '"' : '@quot;','0x22': '@quot;',
-            '&' : '@amp;', '0x26': '@amp;'
+            '<': '@lt ', '0x3c': '@lt', 
+            '>': '@gt ', '0x3e': '@gt', 
+            "'" : '@apos ', '0x27': '@apos',  
+            '"' : '@quot ','0x22': '@quot',
+            '/' : '@bksl',
+            '&' : '@amp ', '0x26': '@amp'
             }
         for key in keywords:
             text = text.replace(key, keywords[key])
