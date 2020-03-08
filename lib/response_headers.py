@@ -40,9 +40,16 @@ class Headers():
 	def addCookie(response, name, value):
 		cookieSetString = ""
 		cookieSetString += name+"="+value+";"
+		
+		
+		if value == "":
+			_expires = datetime.datetime.now() - datetime.timedelta(hours=2)
+			_lifetime = 0
+		else:
+			_lifetime = header_struct["CookieHeaders"]["lifetime"]
+			_expires = datetime.datetime.now() + datetime.timedelta(hours=2)
 
-		_lifetime = header_struct["CookieHeaders"]["lifetime"]
-		_expires = datetime.datetime.now() + datetime.timedelta(hours=2)
+
 
 		_httpOnly = header_struct["CookieHeaders"]["httpOnly"]
 		_samesite = header_struct["CookieHeaders"]["samesite"]

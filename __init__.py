@@ -32,7 +32,12 @@ app.after_request(Headers.addResponseHeaders)
 
 
 
-
+def logoutResponse(dict):
+	blankCookie = cookies.createBlankCookie()
+	response = make_response(jsonify(dict))
+	c_response = Headers.addCookie(response, 'S_ID', blankCookie)
+	c2_response = Headers.addCookie(response, 'USR_ID', blankCookie)
+	return c2_response
 
 
 ##############~~~~~ WEB SERVER PAGES ~~~~~##############
@@ -153,7 +158,9 @@ def changePassword():
 	ip = request.environ['REMOTE_ADDR']
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
-		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
+		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
+
+		
 		
 	else:
 		old_password = request.form.get("old_p")+P_VALUE
@@ -185,7 +192,7 @@ def deleteAccount():
 	ip = request.environ['REMOTE_ADDR']
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
-		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
+		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
 		
 	else:
 		x1 = DB_Manager.execute('''DELETE FROM Comments WHERE (user_UUID='%s')'''
@@ -260,7 +267,7 @@ def createPost():
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
 		print("NO USER")
-		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
+		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
 		
 	else:
 		heading = request.form.get("titleInput")
@@ -298,7 +305,7 @@ def createComment():
 	ip = request.environ['REMOTE_ADDR']
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
-		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
+		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
 	else:
 		body = request.form.get("comment_body")
 		date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -336,14 +343,15 @@ def deletePost():
 	ip = request.environ['REMOTE_ADDR']
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
-		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
-
+		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
 	else:
 		UUID = request.form.get("post_UUID")
 		post_to_delete = DB_Manager.execute('''SELECT * FROM Posts WHERE (UUID='%s');'''
 			% (UUID), "LOW")
 		
-		if post_to_delete[5] != user_UUID:
+		if len(post_to_delete) == 0:
+			ret = {"code":"danger", "reason": "Post does not exist."}
+		elif post_to_delete[0][5] != user_UUID:
 			ret = {"code":"danger", "reason": "You do not own this post."}
 		else:
 			x1 = DB_Manager.execute('''DELETE FROM Comments WHERE (post_UUID='%s')'''
@@ -363,7 +371,7 @@ def deleteComment():
 	ip = request.environ['REMOTE_ADDR']
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
-		ret = {"code": "danger", "reason": "You have been automatically logged out. Please log in again."}
+		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
 
 	else:
 		UUID = request.form.get("comment_UUID")
