@@ -188,7 +188,7 @@ def changePassword():
 	return jsonify(ret)
 
 
-@app.route('/account/deleteAccount')
+@app.route('/account/deleteAccount', methods=['POST'])
 def deleteAccount():
 	usr_cookie = request.cookies.get("S_ID")
 	ip = request.environ['REMOTE_ADDR']
