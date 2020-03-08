@@ -70,7 +70,7 @@ def createUser():
     captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
     
     if captcha_resp == False:
-        ret = {"code":"danger", "reason":"Captcha failed"}
+        ret = {"code":"warning", "reason":"Captcha failed"}
         return jsonify(ret)
     
     print("Passed captcha veri")
@@ -81,13 +81,13 @@ def createUser():
     x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex(), verification_code)
     
     if x1==None or x2 == None: 
-        ret = {"code":"danger", "reason":"There was an issue with your request"}
+        ret = {"code":"warning", "reason":"There was an issue with your request"}
         return jsonify(ret)
     else: 
         Verification.sendVerificationEmail(email, forename, verification_code)
         ret = {"code":"success"}
         return jsonify(ret)
-    ret = {"code":"danger", "reason":"There was an issue with your request"}
+    ret = {"code":"warning", "reason":"There was an issue with your request"}
     return jsonify(ret)
     
     
@@ -98,7 +98,7 @@ def verifyUser():
     verification_Code = request.args.get("id")
     x1 = DB_Manager.execute("ALTER", '''UPDATE User_Auth SET verified='TRUE', verification_code='%s' WHERE (verification_code='%s')''',  new_random_UUID, verification_Code)
     if x1 == None:
-        ret = {"code":"danger", "reason":"Verification ID incorrect"}
+        ret = {"code":"warning", "reason":"Verification ID incorrect"}
     else:
         ret = {"code":"sucess"}
     return jsonify(ret)
@@ -113,11 +113,11 @@ def login():
     
     u_UUID = DB_Manager.getUUID(username)
     if u_UUID == None:
-        ret = {"code":"danger", "reason":"Username or Password incorrect."}
+        ret = {"code":"warning", "reason":"Username or Password incorrect."}
         return jsonify(ret)
     u_salt = DB_Manager.execute("AUTH", '''SELECT salt FROM User_Auth WHERE (UUID = '%s');''', u_UUID)
     if(len(u_salt) == 0): 
-        ret = {"code":"danger", "reason":"Username or Password incorrect."}
+        ret = {"code":"warning", "reason":"Username or Password incorrect."}
         return jsonify(ret)
     else: u_salt = u_salt[0][0]
     
@@ -133,7 +133,7 @@ def login():
         c_response = Headers.addCookie(response, 'USR_ID', u_UUID)
         return c_response
     else:
-        ret = {"code":"danger", "reason":"Username or Password incorrect."}
+        ret = {"code":"warning", "reason":"Username or Password incorrect."}
         return jsonify(ret)
     
     
@@ -151,7 +151,7 @@ def logout():
         ret = {"code": "success"}
         
     else:
-        ret = {"code": "danger", "reason": "Error within user session"}
+        ret = {"code": "warning", "reason": "Error within user session"}
     return jsonify(ret)
 
 
@@ -172,7 +172,7 @@ def changePassword():
         username = DB_Manager.getUsername(user_UUID)
         
         u_salt = DB_Manager.execute("AUTH", '''SELECT salt FROM User_Auth WHERE (UUID = '%s');''', user_UUID)
-        if(len(u_salt) == 0): ret = {"code":"danger", "reason":"Unknown error"}
+        if(len(u_salt) == 0): ret = {"code":"warning", "reason":"Unknown error"}
         else: u_salt = u_salt[0][0]
         
         u_salt = bytearray.fromhex(u_salt)   
@@ -183,11 +183,11 @@ def changePassword():
             salted_pwd = pbkdf2(new_password, new_salt).digest()
             veri_code = Token_generator.new_crypto_bytes(16).hex()
             x2 = DB_Manager.changePassword(username, salted_pwd, new_salt.hex(), veri_code)
-            if x2 == None: ret = {"code":"danger", "reason":"Error with new password"} 
+            if x2 == None: ret = {"code":"warning", "reason":"Error with new password"} 
             else:
                 ret = {"code":"success"}
         else:
-            ret = {"code":"danger", "reason":"Old password incorrect."}
+            ret = {"code":"warning", "reason":"Old password incorrect."}
     return jsonify(ret)
 
 
@@ -205,7 +205,7 @@ def deleteAccount():
         x3 = DB_Manager.execute("ALTER", '''DELETE FROM User_Auth WHERE (UUID='%s')''', user_UUID)
         x4 = DB_Manager.execute("ALTER", '''DELETE FROM Users WHERE (UUID='%s')''', user_UUID)
         if x1 == None or x2 == None or x3 == None or x4 == None:
-            ret = {"code":"danger", "reason":"Unknown error deleting user."}
+            ret = {"code":"warning", "reason":"Unknown error deleting user."}
         else: 
             ret = {"code":"success"}
     return jsonify(ret)
@@ -284,7 +284,7 @@ def createPost():
             
         print("response: ", code)
         if code == None:
-            ret = {"code": "danger", "reason": "Oops! Something went wrong. Please try again."}
+            ret = {"code": "warning", "reason": "Oops! Something went wrong. Please try again."}
         else:
             ret = {
                 "code":"success",
@@ -318,7 +318,7 @@ def createComment():
         code = DB_Manager.execute("ALTER", '''INSERT INTO Comments VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''', UUID, body, date, time, user_UUID, post_UUID)
             
         if code == None:
-            ret = {"code": "danger", "comment": {}}
+            ret = {"code": "warning", "reason": "Oops! Something went wrong. Please try again."}
         else:
             ret = {
                 "code":"success",
@@ -349,15 +349,15 @@ def deletePost():
         UUID = request.form.get("post_UUID")
         post_to_delete = DB_Manager.execute("LOW", '''SELECT * FROM Posts WHERE (UUID='%s');''', UUID)
         if post_to_delete == None:
-            ret = {"code":"danger", "reason": "Post does not exist."}
+            ret = {"code":"warning", "reason": "Post does not exist."}
         elif len(post_to_delete) == 0:
-            ret = {"code":"danger", "reason": "Post does not exist."}
+            ret = {"code":"warning", "reason": "Post does not exist."}
         elif post_to_delete[0][5] != user_UUID:
-            ret = {"code":"danger", "reason": "You do not own this post."}
+            ret = {"code":"warning", "reason": "You do not own this post."}
         else:
             x1 = DB_Manager.execute("ALTER", '''DELETE FROM Comments WHERE (post_UUID='%s')''', UUID)
             x2 = DB_Manager.execute("ALTER", '''DELETE FROM Posts WHERE (UUID='%s')''', UUID)
-            if x1 == None or x2 == None: ret = {"code":"danger", "reason":"There was an error deleting your post."}
+            if x1 == None or x2 == None: ret = {"code":"warning", "reason":"There was an error deleting your post."}
             else: ret = {"code":"success"}
     return jsonify(ret)
 
@@ -379,7 +379,7 @@ def deleteComment():
             ret = {"code":"danger", "reason": "You do not own this comment."}
         else:
             x1 = DB_Manager.execute("ALTER", '''DELETE FROM Comments WHERE (UUID='%s')''', UUID)
-            if x1 == None: ret = {"code":"danger", "reason":"There was an error deleting your comment."}
+            if x1 == None: ret = {"code":"warning", "reason":"There was an error deleting your comment."}
             else: ret = {"code":"success"}
     return jsonify(ret)
         
