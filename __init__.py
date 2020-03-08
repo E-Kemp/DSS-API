@@ -166,18 +166,20 @@ def changePassword():
 		old_password = request.form.get("old_p")+P_VALUE
 		new_password = request.form.get("new_p")+P_VALUE
 		
-		u_UUID = DB_Manager.getUUID(username)
-		u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (u_UUID), "AUTH")
+		username = DB_Manager.getUsername(user_UUID)
+		
+		u_salt = DB_Manager.execute('''SELECT salt FROM User_Auth WHERE (UUID = '%s');''' % (user_UUID), "AUTH")
 		if(len(u_salt) == 0): ret = {"code":"danger", "reason":"Unknown error"}
 		else: u_salt = u_salt[0][0]
 		
 		u_salt = bytearray.fromhex(u_salt)	 
-		e_password = pbkdf2(password, u_salt).digest()
+		e_password = pbkdf2(old_password, u_salt).digest()
 		
 		if DB_Manager.authenticateUser(username, e_password) == True:
 			new_salt = Token_generator.new_crypto_bytes(20)
 			salted_pwd = pbkdf2(new_password, new_salt).digest()
-			x2 = DB_Manager.changePassword(username, salted_pwd, salt.hex())
+			veri_code = Token_generator.new_crypto_bytes(16).hex()
+			x2 = DB_Manager.changePassword(username, salted_pwd, new_salt.hex(), veri_code)
 			if x2 == None: ret = {"code":"danger", "reason":"Error with new password"} 
 			else:
 				ret = {"code":"success"}
