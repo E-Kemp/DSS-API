@@ -50,7 +50,41 @@ def hello():
 def getRobots():
     return send_from_directory(app.static_folder, "robots.txt")
  
- 
+
+
+def checkValidPassword(password,password_blacklist):
+	
+	
+	#if password isn't longer then 12 characters
+	if(len(password) <= 11):
+		return False ,'warning', 'Password must be at least 12 characters long'
+	#if password is in blacklist of passwords
+	
+	else:
+		for word in password_blacklist:
+			if(password.find(word) != -1):
+				return False, 'warning', 'Password contains word from password blacklist'
+			
+		
+	print("working")
+	#check for symbols
+	passAsAscii = [ord(p) for p in password ]
+	counter = 0
+	counterMax = 3
+	returner =False,'warning', 'Password does not contain at least 1 number, 1 special symbol, a capatalised and/or uncaptalised letter'
+	ranges = [[33, 48], [48, 58] ,[58,65],[65,91],  [97, 123]]
+	for r in ranges:
+		for j in range(r[0],r[1]):
+			if j in passAsAscii:
+				counter = counter +1
+				print("wow")
+				if(counter == counterMax):
+					returner = True, '',''
+				break
+	
+	return returner
+
+
 
 @app.route("/account/createUser", methods=['POST'])
 def createUser():  
@@ -65,7 +99,14 @@ def createUser():
     surname = request.form.get("surnameInput")
     DOB = request.form.get("dobInput")
     ip = request.environ['REMOTE_ADDR']
-    
+
+	password_blacklist = ["uea","pirate","cove","piratecove","password","topsecret",
+	"123", "12345","qwerty","abc",email,forename,urname,username]
+	flag,level,mess = checkValidPassword(password,password_blacklist)
+	if flag == False:
+		ret = {"code": level, "reason" : mess}
+		return jsonify(ret)
+	
     captcha_code = request.form.get("g-recaptcha-response")
     captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
     
@@ -409,6 +450,8 @@ def searchPosts():
             posts_dict[p[0]] = dic_rec
     return jsonify(posts_dict)
         
-    
+
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=API_PORT)
