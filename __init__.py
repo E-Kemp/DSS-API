@@ -100,8 +100,8 @@ def verifyUser():
     if x1 == None:
         ret = {"code":"warning", "reason":"Verification ID incorrect"}
     else:
-        ret = {"code":"sucess"}
-    return jsonify(ret)
+        ret = {"code":"success"}
+    return render_template("verification.html", code = ret["code"])
           
    
 

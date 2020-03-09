@@ -1,0 +1,29 @@
+<HTML>
+<head></head>
+
+<script>
+function load(){
+	var resp = "{{ code }}";
+	if(resp == "success"){
+		document.getElementById("message_container").innerHTML = "Verify token accepted. Please close window and login.";
+		
+	}else{
+		document.getElementById("message_container").innerHTML = "Verification token not accepted. Please try again.";
+	}
+
+}
+
+
+
+</script>
+
+<body onload="load()">
+<span id="message_container"></span>
+
+
+
+
+
+
+</body>
+</HTML>
