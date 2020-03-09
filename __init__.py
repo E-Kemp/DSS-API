@@ -101,7 +101,7 @@ def createUser():
 	DOB = request.form.get("dobInput")
 	ip = request.environ['REMOTE_ADDR']
 	password_blacklist = ["uea","pirate","cove","piratecove","password","topsecret",
-	"123", "12345","qwerty","abc",email,forename,urname,username]
+	"123", "12345","qwerty","abc",email,forename,surname,username]
 	flag,level,mess = checkValidPassword(password,password_blacklist)
 	if flag == False:
 		ret = {"code": level, "reason" : mess}
@@ -133,7 +133,6 @@ def createUser():
 	
 	
 	
->>>>>>> 1948f3cd6f6906b83973f4c06b781eced024bb64
 @app.route("/account/verifyUser/")
 def verifyUser():
 	new_random_UUID = Token_generator.new_crypto_bytes(16).hex()
@@ -445,7 +444,7 @@ def deleteComment():
 		
 @app.route('/post/search', methods=['GET'])
 def searchPosts():
-<<<<<<< HEAD
+
     search_term = request.args.get('search_term')
     posts = DB_Manager.execute("LOW", '''SELECT * FROM Posts WHERE (heading LIKE '%s')''', '%'+search_term+'%',)
     
@@ -469,28 +468,5 @@ def searchPosts():
 
 
 
-=======
-	search_term = request.args.get('search_term')
-	posts = DB_Manager.execute("LOW", '''SELECT * FROM Posts WHERE (heading LIKE '%s')''', '%'+search_term+'%',)
-	
-	posts_dict = {}
-	
-	if posts != None:
-		for p in posts:
-			username = DB_Manager.getUsername(p[5])
-			dic_rec = {
-				"UUID": p[0],
-				"heading": p[1],
-				"body": p[2],
-				"date_posted": p[3],
-				"time_posted": p[4],
-				"user_UUID": p[5],
-				"username": username
-			}
-			posts_dict[p[0]] = dic_rec
-	return jsonify(posts_dict)
-		
-	
->>>>>>> 1948f3cd6f6906b83973f4c06b781eced024bb64
 if __name__ == "__main__":
 	app.run(debug=True, port=API_PORT)
