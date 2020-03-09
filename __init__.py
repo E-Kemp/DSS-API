@@ -135,15 +135,15 @@ def createUser():
 	
 @app.route("/account/verifyUser/")
 def verifyUser():
-	new_random_UUID = Token_generator.new_crypto_bytes(16).hex()
-	verification_Code = request.args.get("id")
-	x1 = DB_Manager.execute("ALTER", '''UPDATE User_Auth SET verified='TRUE', verification_code='%s' WHERE (verification_code='%s')''',	 new_random_UUID, verification_Code)
-	if x1 == None:
-		ret = {"code":"warning", "reason":"Verification ID incorrect"}
-	else:
-		ret = {"code":"success"}
-	return render_template("verification.html", code = ret["code"])
-		  
+    new_random_UUID = Token_generator.new_crypto_bytes(16).hex()
+    verification_Code = request.args.get("id")
+    x1 = DB_Manager.execute("AUTH", '''UPDATE User_Auth SET verified='TRUE', verification_code='%s' WHERE (verification_code='%s')''',  new_random_UUID, verification_Code)
+    if x1 == None:
+        ret = {"code":"warning", "reason":"Verification ID incorrect"}
+    else:
+        ret = {"code":"success"}
+    return render_template("verification.html", code = ret["code"])
+
    
 
 @app.route('/account/sign-in', methods=['POST'])
@@ -444,7 +444,6 @@ def deleteComment():
 		
 @app.route('/post/search', methods=['GET'])
 def searchPosts():
-
     search_term = request.args.get('search_term')
     posts = DB_Manager.execute("LOW", '''SELECT * FROM Posts WHERE (heading LIKE '%s')''', '%'+search_term+'%',)
     
@@ -465,7 +464,6 @@ def searchPosts():
             posts_dict[p[0]] = dic_rec
     return jsonify(posts_dict)
         
-
 
 
 if __name__ == "__main__":
