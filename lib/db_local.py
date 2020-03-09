@@ -167,12 +167,12 @@ class DB_Manager():
         """       
         if text == None: return ''
         keywords = {
-            '<': '@lt ', '0x3c': '@lt', 
-            '>': '@gt ', '0x3e': '@gt', 
-            "'" : '@apos ', '0x27': '@apos',  
-            '"' : '@quot ','0x22': '@quot',
+            '<': '@lt', '0x3c': '@lt', 
+            '>': '@gt', '0x3e': '@gt', 
+            "'" : '@apos', '0x27': '@apos',  
+            '"' : '@quot','0x22': '@quot',
             '/' : '@bksl',
-            '&' : '@amp ', '0x26': '@amp'
+            '&' : '@amp', '0x26': '@amp'
             }
         for key in keywords:
             text = text.replace(key, keywords[key])
