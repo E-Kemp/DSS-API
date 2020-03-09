@@ -96,7 +96,7 @@ def createUser():
 def verifyUser():
     new_random_UUID = Token_generator.new_crypto_bytes(16).hex()
     verification_Code = request.args.get("id")
-    x1 = DB_Manager.execute("ALTER", '''UPDATE User_Auth SET verified='TRUE', verification_code='%s' WHERE (verification_code='%s')''',  new_random_UUID, verification_Code)
+    x1 = DB_Manager.execute("AUTH", '''UPDATE User_Auth SET verified='TRUE', verification_code='%s' WHERE (verification_code='%s')''',  new_random_UUID, verification_Code)
     if x1 == None:
         ret = {"code":"warning", "reason":"Verification ID incorrect"}
     else:
