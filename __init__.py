@@ -206,7 +206,13 @@ def deleteAccount():
 	user_UUID = cookies.getUUID(usr_cookie, ip)
 	if user_UUID == None: 
 		return logoutResponse({"code": "danger", "reason": "You have been automatically logged out. Please log in again."})
-		
+	
+	captcha_code = request.form.get("g-recaptcha-response")
+	captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
+	
+	if captcha_resp != True:
+		ret = {"code":"warning", "reason":"Captcha failed"}
+		return jsonify(ret)
 	else:
 		x1 = DB_Manager.execute("ALTER", '''DELETE FROM Comments WHERE (user_UUID='%s')''', user_UUID)
 		x2 = DB_Manager.execute("ALTER", '''DELETE FROM Posts WHERE (user_UUID='%s')''', user_UUID)
