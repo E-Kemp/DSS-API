@@ -359,7 +359,7 @@ def deletePost():
             x2 = DB_Manager.execute("ALTER", '''DELETE FROM Posts WHERE (UUID='%s')''', UUID)
             if x1 == None or x2 == None: ret = {"code":"warning", "reason":"There was an error deleting your post."}
             else: ret = {"code":"success"}
-    return jsonify(ret)
+    return jsonify(ret)  
 
 
 
