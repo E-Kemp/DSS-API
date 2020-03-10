@@ -1,4 +1,4 @@
-import os, datetime, time
+import os, datetime, time, json
 
 class Cookie_struct():
     def __init__(self, HTTPOnly=True, _lifetime=2):
@@ -70,7 +70,14 @@ class Cookie_struct():
     def _toString(self):
         for cookie in self.cookies:
             print(cookie)
-        
+    
+    def saveSessions(self):
+        with open('sessions.json', 'w') as outfile:
+            json.dump(self.cookies, outfile)
+    def getSessions(self):
+        data = open('config/HEADERS_local.conf', 'r')
+        return json.load(data)
+
 class CSRF_tokens_struct():
     def __init__(self):
         self.CSRF_tokens = {}   #

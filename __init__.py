@@ -295,12 +295,12 @@ def getPosts():
         for p in posts:
             username = DB_Manager.getUsername(p[5])
             dic_rec = {
-                "UUID": p[0],
-                "heading": p[1],
-                "body": p[2],
-                "date_posted": p[3],
-                "time_posted": p[4],
-                "user_UUID": p[5],
+                "UUID": str(p[0]),
+                "heading": str(p[1]),
+                "body": str(p[2]),
+                "date_posted": str(p[3]),
+                "time_posted": str(p[4]),
+                "user_UUID": str(p[5]),
                 "username": username
             }
             posts_dict[p[0]] = dic_rec
@@ -317,13 +317,13 @@ def getComments():
         for c in comments:
             username = DB_Manager.getUsername(c[4])
             dict_rec = {
-                "UUID": c[0],
-                "body": c[1],
-                "date_posted": c[2],
-                "time_posted": c[3],
+                "UUID": str(c[0]),
+                "body": str(c[1]),
+                "date_posted": str(c[2]),
+                "time_posted": str(c[3]),
                 "username": username,
-                "post_UUID": c[5],
-                "user_UUID": c[4]
+                "post_UUID": str(c[5]),
+                "user_UUID": str(c[4])
             }
             comments_dict[c[0]] = dict_rec
     
@@ -432,11 +432,11 @@ def deletePost():
         UUID = request.form.get("post_UUID")
         post_to_delete = DB_Manager.execute("LOW", '''SELECT * FROM Posts WHERE (UUID='%s');''', UUID)
         if post_to_delete == None:
-            ret = {"code":"warning", "reason": "Post does not exist."}
+            ret = {"code":"warning", "reason": "There was an error deleting your post."}
         elif len(post_to_delete) == 0:
-            ret = {"code":"warning", "reason": "Post does not exist."}
+            ret = {"code":"warning", "reason": "There was an error deleting your post."}
         elif post_to_delete[0][5] != user_UUID:
-            ret = {"code":"warning", "reason": "You do not own this post."}
+            ret = {"code":"warning", "reason": "There was an error deleting your post."}
         else:
             x1 = DB_Manager.execute("ALTER", '''DELETE FROM Comments WHERE (post_UUID='%s')''', UUID)
             x2 = DB_Manager.execute("ALTER", '''DELETE FROM Posts WHERE (UUID='%s')''', UUID)
@@ -459,10 +459,12 @@ def deleteComment():
     else:
         UUID = request.form.get("comment_UUID")
         comment_to_delete = DB_Manager.execute("LOW", '''SELECT * FROM Comments WHERE (UUID='%s');''', UUID)
+        print("SENT UUID: ", UUID)
+        print("RETRIEVED UUID: ", comment_to_delete)
         if comment_to_delete == None or len(comment_to_delete) == 0:
-            ret = {"code":"warning", "reason": "Comment with this ID does not exist"}
+            ret = {"code":"warning", "reason": "There was an error deleting your comment."}
         elif comment_to_delete[0][4] != user_UUID:
-            ret = {"code":"warning", "reason": "You do not own this comment."}
+            ret = {"code":"warning", "reason": "There was an error deleting your comment."}
         else:
             x1 = DB_Manager.execute("ALTER", '''DELETE FROM Comments WHERE (UUID='%s')''', UUID)
             if x1 == None: ret = {"code":"warning", "reason":"There was an error deleting your comment."}
