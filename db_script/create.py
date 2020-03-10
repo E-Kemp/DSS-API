@@ -58,6 +58,9 @@ CREATE TABLE Sessions(
 
 ''')
 
+#SELECT COUNT(Users.UUID) INTO records FROM Users INNER JOIN User_Auth ON (Users.UUID = User_Auth.UUID) WHERE (User_Auth.verified = 'TRUE');
+
+
 # CREATE OR replace FUNCTION Authenticate_User (_username VARCHAR, _password VARCHAR)
 # RETURNS boolean AS $$
 # declare
