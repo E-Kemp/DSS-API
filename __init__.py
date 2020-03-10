@@ -209,7 +209,7 @@ def deleteAccount():
 	
 	captcha_code = request.form.get("g-recaptcha-response")
 	captcha_resp = Verification.verifyCaptchaCode(captcha_code, ip)
-	
+	print(captcha_code)
 	if captcha_resp != True:
 		ret = {"code":"warning", "reason":"Captcha failed"}
 		return jsonify(ret)

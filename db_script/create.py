@@ -50,6 +50,12 @@ CREATE TABLE Comments(
     FOREIGN KEY (post_UUID) REFERENCES Posts(UUID)
 );
 
+CREATE TABLE Sessions(
+	UUID VARCHAR(40) PRIMARY KEY NOT NULL,
+	ip VARCHAR(15),
+	csrf VARCHAR(40)
+	);
+
 ''')
 
 # CREATE OR replace FUNCTION Authenticate_User (_username VARCHAR, _password VARCHAR)
@@ -66,20 +72,20 @@ CREATE TABLE Comments(
 # end $$ LANGUAGE plpgsql;
 
 
-CREATE OR replace FUNCTION Change_Password (_username VARCHAR, _password VARCHAR, _salt VARCHAR, _vericode VARCHAR)
-RETURNS void AS $$
-declare 
-    usr_UUID VARCHAR(40);
-    num_Auth_records INTEGER;
-begin
-    SELECT Users.UUID INTO usr_UUID FROM Users WHERE (username = _username);
-    SELECT COUNT(*) INTO num_Auth_records FROM User_Auth WHERE (UUID = usr_UUID);
-    IF num_Auth_records = 0 THEN
-        INSERT INTO User_Auth VALUES (usr_UUID, _password, _salt, 'FALSE', _vericode);
-    ELSE
-        UPDATE User_Auth SET password=_password, salt=_salt, verification_code=_vericode WHERE (UUID=usr_UUID);
-    END IF;
-end $$ LANGUAGE plpgsql;
+# CREATE OR replace FUNCTION Change_Password (_username VARCHAR, _password VARCHAR, _salt VARCHAR, _vericode VARCHAR)
+# RETURNS void AS $$
+# declare 
+    # usr_UUID VARCHAR(40);
+    # num_Auth_records INTEGER;
+# begin
+    # SELECT Users.UUID INTO usr_UUID FROM Users WHERE (username = _username);
+    # SELECT COUNT(*) INTO num_Auth_records FROM User_Auth WHERE (UUID = usr_UUID);
+    # IF num_Auth_records = 0 THEN
+        # INSERT INTO User_Auth VALUES (usr_UUID, _password, _salt, 'FALSE', _vericode);
+    # ELSE
+        # UPDATE User_Auth SET password=_password, salt=_salt, verification_code=_vericode WHERE (UUID=usr_UUID);
+    # END IF;
+# end $$ LANGUAGE plpgsql;
 
 
 
