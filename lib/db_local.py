@@ -17,6 +17,7 @@ class DB_Manager():
         
         sql_args = []
         for arg in argv:
+            print("ARG: ", arg)
             sql_args.append(DB_Manager.filter(arg))
             
         sql_args_tuple = tuple(sql_args)        
