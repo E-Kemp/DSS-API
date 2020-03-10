@@ -5,6 +5,7 @@ cur = db.cursor()
 
 cur.executescript('''
 DROP TABLE IF EXISTS Comments;
+DROP TABLE IF EXISTS Sessions;
 DROP TABLE IF EXISTS User_Auth;
 DROP TABLE IF EXISTS Posts;
 DROP TABLE IF EXISTS Users;
@@ -49,6 +50,13 @@ CREATE TABLE Comments(
     FOREIGN KEY (user_UUID) REFERENCES Users(UUID),
     FOREIGN KEY (post_UUID) REFERENCES Posts(UUID)
 );
+
+CREATE TABLE Sessions(
+	UUID VARCHAR(40) PRIMARY KEY NOT NULL,
+	cookie VARCHAR(40),
+	ip VARCHAR(15),
+	csrf VARCHAR(40)
+	);
 
 ''')
 

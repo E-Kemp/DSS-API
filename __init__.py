@@ -30,7 +30,7 @@ cookies = Cookie_struct(True, 2)
 app = Flask(__name__)
 app.after_request(Headers.addResponseHeaders)
 
-
+cookies.clearCookies()
 
 def logoutResponse(dict):
     blankCookie = cookies.createBlankCookie()
